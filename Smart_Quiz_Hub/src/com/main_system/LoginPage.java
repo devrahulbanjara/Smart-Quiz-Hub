@@ -4,11 +4,12 @@ import java.awt.EventQueue;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.*;
 
 class LoginPage extends JFrame {
     private JPanel contentPane;
     private JTextField emailTextField;
-    private JTextField passwordTextField;
+    private JPasswordField passwordTextField;
 
     public LoginPage() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,7 +34,7 @@ class LoginPage extends JFrame {
         emailTextField.setBounds(200, 90, 120, 20);
         contentPane.add(emailTextField);
         
-        passwordTextField = new JTextField();
+        passwordTextField = new JPasswordField();
         passwordTextField.setBounds(200, 120, 120, 20);
         contentPane.add(passwordTextField);
         
@@ -47,8 +48,20 @@ class LoginPage extends JFrame {
         
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new HomePage().setVisible(true);
-                dispose();
+            	String email = emailTextField.getText();
+            	String password = new String(passwordTextField.getPassword());
+            	
+            	if (email.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "All fields are required.");
+                    return;
+                }
+            	
+                if (authenticateUser(email,password)) {
+                    new HomePage().setVisible(true);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid email or password.");
+                }
             }
         });
         
@@ -59,5 +72,19 @@ class LoginPage extends JFrame {
             }
         });
     }
+
+    private boolean authenticateUser(String email, String password) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM player_details WHERE Email = ? AND Password = ?")) {
+            stmt.setString(1, email);
+            stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
 }
+
 

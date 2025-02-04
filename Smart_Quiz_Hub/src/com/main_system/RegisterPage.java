@@ -2,18 +2,16 @@ package com.main_system;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.*;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
+
 
 class RegisterPage extends JFrame {
     private JPanel contentPane;
     private JTextField nameTextField;
     private JTextField emailTextField;
-    private JTextField passwordTextField;
+    private JPasswordField passwordTextField;
     
     public RegisterPage() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,19 +44,64 @@ class RegisterPage extends JFrame {
         emailTextField.setBounds(200, 100, 120, 20);
         contentPane.add(emailTextField);
         
-        passwordTextField = new JTextField();
+        passwordTextField = new JPasswordField();
         passwordTextField.setBounds(200, 130, 120, 20);
         contentPane.add(passwordTextField);
         
         JButton registerButton = new JButton("Register");
-        registerButton.setBounds(150, 180, 120, 25);
+        registerButton.setBounds(100, 180, 120, 25);
         contentPane.add(registerButton);
+        
+        JButton loginButton = new JButton("Go to Login");
+        loginButton.setBounds(230, 180, 120, 25);
+        contentPane.add(loginButton);
         
         registerButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new HomePage().setVisible(true);
+                String name = nameTextField.getText().trim();
+                String email = emailTextField.getText().trim();
+                String password = new String(passwordTextField.getPassword()).trim();
+                
+                if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "All fields are required.");
+                    return;
+                }
+                
+                registerUser(name, email, password);
+            }
+        });
+        
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new LoginPage().setVisible(true);
                 dispose();
             }
         });
+    }
+
+    private void registerUser(String name, String email, String password) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM users WHERE Email = ?");
+            checkStmt.setString(1, email);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                JOptionPane.showMessageDialog(null, "Email already exists. Redirecting to login page.");
+                new LoginPage().setVisible(true);
+                dispose();
+                return;
+            }
+
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO users (Name, Email, Password) VALUES (?, ?, ?)");
+            insertStmt.setString(1, name);
+            insertStmt.setString(2, email);
+            insertStmt.setString(3, password);
+            insertStmt.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Registration Successful!");
+            new HomePage().setVisible(true);
+            dispose();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error in registration: " + ex.getMessage());
+        }
     }
 }
