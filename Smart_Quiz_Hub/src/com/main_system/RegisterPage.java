@@ -6,7 +6,6 @@ import java.sql.*;
 
 import javax.swing.*;
 
-
 class RegisterPage extends JFrame {
     private JPanel contentPane;
     private JTextField nameTextField;
@@ -81,7 +80,7 @@ class RegisterPage extends JFrame {
 
     private void registerUser(String name, String email, String password) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
-            PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM users WHERE Email = ?");
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM player_details WHERE Email = ?");
             checkStmt.setString(1, email);
             ResultSet rs = checkStmt.executeQuery();
             if (rs.next()) {
@@ -91,13 +90,13 @@ class RegisterPage extends JFrame {
                 return;
             }
 
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO users (Name, Email, Password) VALUES (?, ?, ?)");
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO player_details (Name, Email, Password) VALUES (?, ?, ?)");
             insertStmt.setString(1, name);
             insertStmt.setString(2, email);
             insertStmt.setString(3, password);
             insertStmt.executeUpdate();
             JOptionPane.showMessageDialog(null, "Registration Successful!");
-            new HomePage().setVisible(true);
+            new PlayerHomePage().setVisible(true);
             dispose();
         } catch (SQLException ex) {
             ex.printStackTrace();

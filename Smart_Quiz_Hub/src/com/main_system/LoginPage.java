@@ -10,10 +10,12 @@ class LoginPage extends JFrame {
     private JPanel contentPane;
     private JTextField emailTextField;
     private JPasswordField passwordTextField;
+    private JRadioButton playerRadioButton;
+    private JRadioButton adminRadioButton;
 
     public LoginPage() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 450, 300);
+        setBounds(100, 100, 450, 350);
         contentPane = new JPanel();
         setContentPane(contentPane);
         contentPane.setLayout(null);
@@ -38,29 +40,45 @@ class LoginPage extends JFrame {
         passwordTextField.setBounds(200, 120, 120, 20);
         contentPane.add(passwordTextField);
         
+        playerRadioButton = new JRadioButton("Player", true);
+        playerRadioButton.setBounds(100, 150, 100, 20);
+        contentPane.add(playerRadioButton);
+        
+        adminRadioButton = new JRadioButton("Admin");
+        adminRadioButton.setBounds(220, 150, 100, 20);
+        contentPane.add(adminRadioButton);
+        
+        ButtonGroup roleGroup = new ButtonGroup();
+        roleGroup.add(playerRadioButton);
+        roleGroup.add(adminRadioButton);
+        
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(100, 170, 100, 25);
+        loginButton.setBounds(100, 200, 100, 25);
         contentPane.add(loginButton);
         
         JButton registerButton = new JButton("Register");
-        registerButton.setBounds(220, 170, 100, 25);
+        registerButton.setBounds(220, 200, 100, 25);
         contentPane.add(registerButton);
         
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	String email = emailTextField.getText();
-            	String password = new String(passwordTextField.getPassword());
-            	
-            	if (email.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "All fields are required.");
-                    return;
-                }
-            	
-                if (authenticateUser(email,password)) {
-                    new HomePage().setVisible(true);
-                    dispose();
+                String email = emailTextField.getText();
+                String password = new String(passwordTextField.getPassword());
+                
+                if (playerRadioButton.isSelected()) {
+                    if (authenticateUser(email, password, "player_details")) {
+                        new PlayerHomePage().setVisible(true);
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Invalid email or password.");
+                    }
                 } else {
-                    JOptionPane.showMessageDialog(null, "Invalid email or password.");
+                    if (authenticateUser(email, password, "admin_details")) {
+                        new AdminHomePage().setVisible(true);
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Invalid admin credentials.");
+                    }
                 }
             }
         });
@@ -73,9 +91,9 @@ class LoginPage extends JFrame {
         });
     }
 
-    private boolean authenticateUser(String email, String password) {
+    private boolean authenticateUser(String email, String password, String tableName) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM player_details WHERE Email = ? AND Password = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM " + tableName + " WHERE Email = ? AND Password = ?")) {
             stmt.setString(1, email);
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
@@ -86,5 +104,3 @@ class LoginPage extends JFrame {
         }
     }
 }
-
-
