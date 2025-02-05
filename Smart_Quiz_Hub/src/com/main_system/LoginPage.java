@@ -1,6 +1,5 @@
 package com.main_system;
 
-import java.awt.EventQueue;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -64,10 +63,11 @@ class LoginPage extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String email = emailTextField.getText();
                 String password = new String(passwordTextField.getPassword());
-                
+
                 if (playerRadioButton.isSelected()) {
-                    if (authenticateUser(email, password, "player_details")) {
-                        new PlayerHomePage().setVisible(true);
+                    Competitor competitor = fetchCompetitor(email, password);
+                    if (competitor != null) {
+                        new PlayerHomePage(competitor).setVisible(true);
                         dispose();
                     } else {
                         JOptionPane.showMessageDialog(null, "Invalid email or password.");
@@ -94,13 +94,48 @@ class LoginPage extends JFrame {
     private boolean authenticateUser(String email, String password, String tableName) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM " + tableName + " WHERE Email = ? AND Password = ?")) {
+            
+            System.out.println("Email: " + email);
+            System.out.println("Password: " + password);
+            
             stmt.setString(1, email);
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
-            return rs.next();
+            
+            if (rs.next()) {
+                System.out.println("User authenticated successfully.");
+                return true;
+            } else {
+                System.out.println("Invalid credentials.");
+                return false;
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
             return false;
         }
+    }
+
+
+    private Competitor fetchCompetitor(String email, String password) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM player_details WHERE Email = ? AND Password = ?")) {
+            stmt.setString(1, email);
+            stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                int competitorID = rs.getInt("ID");  
+                String fullName = rs.getString("Name");  
+                String competitionLevel = "Beginner";
+                int age = 18;
+                int[] scores = {0, 0, 0, 0, 0};  
+
+                Name name = new Name(fullName, "", "");  
+                return new Competitor(competitorID, name, competitionLevel, age, scores);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 }

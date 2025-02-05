@@ -90,17 +90,34 @@ class RegisterPage extends JFrame {
                 return;
             }
 
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO player_details (Name, Email, Password) VALUES (?, ?, ?)");
+            PreparedStatement insertStmt = conn.prepareStatement(
+                "INSERT INTO player_details (Name, Email, Password) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS
+            );
             insertStmt.setString(1, name);
             insertStmt.setString(2, email);
             insertStmt.setString(3, password);
             insertStmt.executeUpdate();
-            JOptionPane.showMessageDialog(null, "Registration Successful!");
-            new PlayerHomePage().setVisible(true);
+
+            ResultSet generatedKeys = insertStmt.getGeneratedKeys();
+            int competitorID = -1;
+            if (generatedKeys.next()) {
+                competitorID = generatedKeys.getInt(1);
+            }
+
+            Name playerName = new Name(name, "", "");  // Adjust as necessary
+            String competitionLevel = "Beginner";  // Default level
+            int age = 18;  // Default age (adjust if needed)
+            int[] defaultScores = {0, 0, 0, 0, 0};  // Default empty scores
+
+            Competitor competitor = new Competitor(competitorID, playerName, competitionLevel, age, defaultScores);
+            new PlayerHomePage(competitor).setVisible(true);
             dispose();
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error in registration: " + ex.getMessage());
         }
     }
+
+
 }
