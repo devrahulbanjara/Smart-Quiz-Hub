@@ -32,6 +32,11 @@ class PlayerHomePage extends JFrame {
         viewPlayerDetailsButton.setBounds(137, 160, 176, 30);
         contentPane.add(viewPlayerDetailsButton);
         
+        // Back to Login Button
+        JButton backToLoginButton = new JButton("Back to Login");
+        backToLoginButton.setBounds(137, 200, 176, 30);
+        contentPane.add(backToLoginButton);
+
         viewHighScoresButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null, "View High Scores functionality not implemented yet.");
@@ -47,6 +52,14 @@ class PlayerHomePage extends JFrame {
         viewPlayerDetailsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null, "View Player Details functionality not implemented yet.");
+            }
+        });
+
+        // Action listener for Back to Login Button
+        backToLoginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new LoginPage().setVisible(true);  // Show LoginPage
+                dispose();  // Close PlayerHomePage
             }
         });
     }

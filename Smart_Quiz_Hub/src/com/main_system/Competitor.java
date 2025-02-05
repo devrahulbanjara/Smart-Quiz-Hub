@@ -9,14 +9,22 @@ public class Competitor {
     private int age;
     private int[] scores;
 
+    public Competitor(int competitorID, Name name, String competitionLevel, int age) {
+        this.competitorID = competitorID;
+        this.name = name;
+        this.competitionLevel = competitionLevel;
+        this.age = age;
+        this.scores = new int[5];
+    }
+    
     public Competitor(int competitorID, Name name, String competitionLevel, int age, int[] scores) {
         this.competitorID = competitorID;
         this.name = name;
         this.competitionLevel = competitionLevel;
         this.age = age;
-        this.scores = scores;
+        this.scores = scores;  
     }
-
+    
     public int getCompetitorID() {
         return competitorID;
     }
@@ -53,27 +61,25 @@ public class Competitor {
         return scores;
     }
 
-    public double getOverallScore() {
+    public void setScores(int[] scores) {
+        this.scores = scores;
+    }
+
+    public int getOverallScore() {
         if (scores == null || scores.length == 0) {
             return 0;
         }
+        
+        int totalScore = 0;
+        int maxScore = scores.length * 5;
 
-        Arrays.sort(scores);
-        
-        if (scores.length > 2) {
-            int sum = 0;
-            for (int i = 1; i < scores.length - 1; i++) {
-                sum += scores[i];
-            }
-            return (double) sum / (scores.length - 2);
-        }
-        
-        int sum = 0;
         for (int score : scores) {
-            sum += score;
+            totalScore += score;
         }
-        return (double) sum / scores.length;
+
+        return (int) Math.round(((double) totalScore / maxScore) * 100);
     }
+
 
     public String getFullDetails() {
         return "Competitor number " + competitorID + ", name " + name.getFullName() + ", age " + age + ". " +

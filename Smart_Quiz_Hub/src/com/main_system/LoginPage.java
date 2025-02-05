@@ -95,18 +95,13 @@ class LoginPage extends JFrame {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM " + tableName + " WHERE Email = ? AND Password = ?")) {
             
-            System.out.println("Email: " + email);
-            System.out.println("Password: " + password);
-            
             stmt.setString(1, email);
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                System.out.println("User authenticated successfully.");
                 return true;
             } else {
-                System.out.println("Invalid credentials.");
                 return false;
             }
         } catch (SQLException ex) {
@@ -114,7 +109,6 @@ class LoginPage extends JFrame {
             return false;
         }
     }
-
 
     private Competitor fetchCompetitor(String email, String password) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");

@@ -3,7 +3,6 @@ package com.main_system;
 import java.sql.*;
 import java.util.*;
 import java.util.List;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -21,18 +20,13 @@ public class PlayQuiz extends JFrame {
     private List<Question> questions;
     private int questionIndex;
     private String selectedLevel;
+    private int roundScore;
 
     public PlayQuiz(Competitor competitor) {
         this.competitor = competitor;
         this.currentRound = 0;
-        this.roundScores = new int[totalRounds];
+        this.roundScores = new int[totalRounds]; 
         this.connection = establishConnection();
-
-        if (hasAlreadyPlayed()) {
-            JOptionPane.showMessageDialog(null, "You have already played the quiz. You cannot play again.", "Quiz Locked", JOptionPane.WARNING_MESSAGE);
-            dispose();
-            return;
-        }
 
         setTitle("Play Quiz");
         setSize(600, 400);
@@ -53,6 +47,12 @@ public class PlayQuiz extends JFrame {
         }
         add(centerPanel, BorderLayout.CENTER);
 
+        if (isCompetitorAlreadyPlayed()) {
+            JOptionPane.showMessageDialog(null, "You have already played this quiz.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+            return;
+        }
+
         startQuiz();
         setVisible(true);
     }
@@ -70,8 +70,7 @@ public class PlayQuiz extends JFrame {
         }
     }
 
-    private boolean hasAlreadyPlayed() {
-        if (connection == null) return false;
+    private boolean isCompetitorAlreadyPlayed() {
         try {
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM competitor_scores WHERE competitor_id = ?");
             stmt.setInt(1, competitor.getCompetitorID());
@@ -79,8 +78,8 @@ public class PlayQuiz extends JFrame {
             return rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     private void startQuiz() {
@@ -89,6 +88,7 @@ public class PlayQuiz extends JFrame {
         }
         questions = fetchQuestions(selectedLevel);
         questionIndex = 0;
+        roundScore = 0;
         showQuestion();
     }
 
@@ -99,15 +99,15 @@ public class PlayQuiz extends JFrame {
     }
 
     private List<Question> fetchQuestions(String level) {
-        List<Question> questionList = new ArrayList<>();
-        if (connection == null) return questionList;
+        List<Question> questions = new ArrayList<>();
+        if (connection == null) return questions;
         try {
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM quiz_questions WHERE level = ? ORDER BY RAND() LIMIT ?");
             stmt.setString(1, level);
             stmt.setInt(2, questionsPerRound);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                questionList.add(new Question(
+                questions.add(new Question(
                         rs.getInt("question_id"),
                         rs.getString("question_text"),
                         rs.getString("option_1"),
@@ -121,29 +121,32 @@ public class PlayQuiz extends JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return questionList;
+        return questions;
     }
 
     private void showQuestion() {
         if (questionIndex < questions.size()) {
             Question q = questions.get(questionIndex);
-            questionLabel.setText("Round " + (currentRound + 1) + ": " + q.getQuestionText());
+            questionLabel.setText(q.getQuestionText());
             optionButtons[0].setText(q.getOption1());
             optionButtons[1].setText(q.getOption2());
             optionButtons[2].setText(q.getOption3());
             optionButtons[3].setText(q.getOption4());
         } else {
-            roundScores[currentRound] = questionIndex;
+            roundScores[currentRound] = roundScore; 
             currentRound++;
 
             if (currentRound < totalRounds) {
-                JOptionPane.showMessageDialog(null, "Round " + currentRound + " is over! Now starting Round " + (currentRound + 1));
+                JOptionPane.showMessageDialog(null, "Round " + currentRound + " completed! Starting next round...");
                 questionIndex = 0;
+                roundScore = 0;
                 questions = fetchQuestions(selectedLevel);
                 showQuestion();
             } else {
-                saveScoresToDatabase();
-                JOptionPane.showMessageDialog(null, "Quiz completed! Your final scores: " + Arrays.toString(roundScores));
+                competitor.setScores(roundScores);  
+                int overallScore = competitor.getOverallScore(); 
+                saveScoresToDatabase(overallScore);  
+                JOptionPane.showMessageDialog(null, "Quiz completed! Your final overall score: " + overallScore);
                 dispose();
             }
         }
@@ -155,30 +158,28 @@ public class PlayQuiz extends JFrame {
             Question currentQuestion = questions.get(questionIndex);
             int selectedAnswer = Arrays.asList(optionButtons).indexOf(clickedButton) + 1;
             if (selectedAnswer == currentQuestion.getCorrectOption()) {
-                roundScores[currentRound]++;
+                roundScore++;
             }
             questionIndex++;
             showQuestion();
         }
     }
 
-    private void saveScoresToDatabase() {
-        if (connection == null) return;
-
+    private void saveScoresToDatabase(int overallScore) {
         try {
-            String query = "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement insertStmt = connection.prepareStatement(query);
-            insertStmt.setInt(1, competitor.getCompetitorID());
-            insertStmt.setString(2, competitor.getName().getFullName());
-            insertStmt.setString(3, selectedLevel);
-            insertStmt.setInt(4, roundScores[0]);
-            insertStmt.setInt(5, roundScores[1]);
-            insertStmt.setInt(6, roundScores[2]);
-            insertStmt.setInt(7, roundScores[3]);
-            insertStmt.setInt(8, roundScores[4]);
-
-            insertStmt.executeUpdate();
-            JOptionPane.showMessageDialog(null, "Scores saved successfully!");
+            PreparedStatement stmt = connection.prepareStatement(
+                "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            );
+            stmt.setInt(1, competitor.getCompetitorID());
+            stmt.setString(2, competitor.getName().getFullName());
+            stmt.setString(3, selectedLevel);
+            stmt.setInt(4, roundScores[0]);
+            stmt.setInt(5, roundScores[1]);
+            stmt.setInt(6, roundScores[2]);
+            stmt.setInt(7, roundScores[3]);
+            stmt.setInt(8, roundScores[4]);
+            stmt.setInt(9, overallScore);  
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
