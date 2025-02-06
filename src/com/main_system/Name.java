@@ -5,10 +5,13 @@ public class Name {
     private String middleName;
     private String lastName;
 
-    public Name(String firstName, String middleName, String lastName) {
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
+    public Name(String fullName) {
+        // Split the full name into parts: first, middle, and last
+        String[] nameParts = fullName.split(" ");
+        
+        this.firstName = nameParts[0];
+        this.middleName = (nameParts.length > 2) ? nameParts[1] : "";  // Middle name is empty if not available
+        this.lastName = (nameParts.length > 1) ? nameParts[nameParts.length - 1] : ""; // Last name is the last part
     }
 
     public String getFirstName() {
@@ -40,6 +43,24 @@ public class Name {
     }
 
     public String getInitials() {
-        return firstName.charAt(0) + "" + middleName.charAt(0) + "" + lastName.charAt(0);
+        StringBuilder initials = new StringBuilder();
+
+        // Ensure first name is not empty before accessing its first character
+        if (firstName != null && !firstName.isEmpty()) {
+            initials.append(firstName.charAt(0));
+        }
+
+        // Ensure middle name is not empty before accessing its first character
+        if (middleName != null && !middleName.isEmpty()) {
+            initials.append(middleName.charAt(0));
+        }
+
+        // Ensure last name is not empty before accessing its first character
+        if (lastName != null && !lastName.isEmpty()) {
+            initials.append(lastName.charAt(0));
+        }
+
+        return initials.toString();
     }
+
 }

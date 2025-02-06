@@ -138,7 +138,7 @@ class LoginPage extends JFrame {
                 // Save the selected level to the database if it's not already saved
                 saveCompetitorLevel(competitorID, selectedLevel);
 
-                Name name = new Name(fullName, "", "");
+                Name name = new Name(fullName);
                 return new Competitor(competitorID, name, selectedLevel, 0, new int[5]);
             }
         } catch (SQLException ex) {

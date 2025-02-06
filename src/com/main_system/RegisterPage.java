@@ -136,7 +136,7 @@ class RegisterPage extends JFrame {
                 competitorID = generatedKeys.getInt(1);
             }
 
-            Name playerName = new Name(name, "", "");  // Adjust as necessary
+            Name playerName = new Name(name);  // Adjust as necessary
             int[] defaultScores = {0, 0, 0, 0, 0};  // Default empty scores
 
             Competitor competitor = new Competitor(competitorID, playerName, selectedLevel, age, defaultScores);  // Set level

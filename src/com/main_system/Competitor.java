@@ -16,15 +16,15 @@ public class Competitor {
         this.age = age;
         this.scores = new int[5];
     }
-    
+
     public Competitor(int competitorID, Name name, String competitionLevel, int age, int[] scores) {
         this.competitorID = competitorID;
         this.name = name;
         this.competitionLevel = competitionLevel;
         this.age = age;
-        this.scores = scores;  
+        this.scores = scores;
     }
-    
+
     public int getCompetitorID() {
         return competitorID;
     }
@@ -69,7 +69,7 @@ public class Competitor {
         if (scores == null || scores.length == 0) {
             return 0;
         }
-        
+
         int totalScore = 0;
         int maxScore = scores.length * 5;
 
@@ -79,7 +79,6 @@ public class Competitor {
 
         return (int) Math.round(((double) totalScore / maxScore) * 100);
     }
-
 
     public String getFullDetails() {
         return "Competitor number " + competitorID + ", name " + name.getFullName() + ", age " + age + ". " +
