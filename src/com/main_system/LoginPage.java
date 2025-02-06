@@ -11,10 +11,11 @@ class LoginPage extends JFrame {
     private JPasswordField passwordTextField;
     private JRadioButton playerRadioButton;
     private JRadioButton adminRadioButton;
+    private JComboBox<String> levelComboBox;
 
     public LoginPage() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 450, 350);
+        setBounds(100, 100, 450, 400);
         contentPane = new JPanel();
         setContentPane(contentPane);
         contentPane.setLayout(null);
@@ -50,27 +51,37 @@ class LoginPage extends JFrame {
         ButtonGroup roleGroup = new ButtonGroup();
         roleGroup.add(playerRadioButton);
         roleGroup.add(adminRadioButton);
-        
+
+        JLabel levelLabel = new JLabel("Select Level");
+        levelLabel.setBounds(100, 180, 100, 20);
+        contentPane.add(levelLabel);
+
+        String[] levels = {"Beginner", "Intermediate", "Advanced"};
+        levelComboBox = new JComboBox<>(levels);
+        levelComboBox.setBounds(200, 180, 120, 20);
+        contentPane.add(levelComboBox);
+
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(100, 200, 100, 25);
+        loginButton.setBounds(100, 220, 100, 25);
         contentPane.add(loginButton);
         
         JButton registerButton = new JButton("Register");
-        registerButton.setBounds(220, 200, 100, 25);
+        registerButton.setBounds(220, 220, 100, 25);
         contentPane.add(registerButton);
         
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String email = emailTextField.getText();
                 String password = new String(passwordTextField.getPassword());
+                String selectedLevel = (String) levelComboBox.getSelectedItem();
 
                 if (playerRadioButton.isSelected()) {
-                    Competitor competitor = fetchCompetitor(email, password);
+                    Competitor competitor = fetchCompetitor(email, password, selectedLevel);
                     if (competitor != null) {
                         new PlayerHomePage(competitor).setVisible(true);
                         dispose();
                     } else {
-                        JOptionPane.showMessageDialog(null, "Invalid email or password.");
+                        JOptionPane.showMessageDialog(null, "Invalid user email or password.");
                     }
                 } else {
                     if (authenticateUser(email, password, "admin_details")) {
@@ -99,37 +110,46 @@ class LoginPage extends JFrame {
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
             
-            if (rs.next()) {
-                return true;
-            } else {
-                return false;
-            }
+            return rs.next();
         } catch (SQLException ex) {
             ex.printStackTrace();
             return false;
         }
     }
 
-    private Competitor fetchCompetitor(String email, String password) {
+    private Competitor fetchCompetitor(String email, String password, String selectedLevel) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM player_details WHERE Email = ? AND Password = ?")) {
+
             stmt.setString(1, email);
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
-            
+
             if (rs.next()) {
                 int competitorID = rs.getInt("ID");  
-                String fullName = rs.getString("Name");  
-                String competitionLevel = "Beginner";
-                int age = 18;
-                int[] scores = {0, 0, 0, 0, 0};  
+                String fullName = rs.getString("Name");
+
+                // Save the selected level to the database
+                saveCompetitorLevel(competitorID, selectedLevel);
 
                 Name name = new Name(fullName, "", "");  
-                return new Competitor(competitorID, name, competitionLevel, age, scores);
+                return new Competitor(competitorID, name, selectedLevel, 0, new int[5]); // Set age to 0 or remove it completely
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
         return null;
+    }
+
+
+    private void saveCompetitorLevel(int competitorID, String selectedLevel) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
+             PreparedStatement stmt = conn.prepareStatement("UPDATE player_details SET competition_level = ? WHERE ID = ?")) {
+            stmt.setString(1, selectedLevel);
+            stmt.setInt(2, competitorID);
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
 }
