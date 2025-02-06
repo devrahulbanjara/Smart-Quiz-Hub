@@ -21,7 +21,6 @@ public class AllPlayers extends JFrame {
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
-        // Create Top Panel for Title and "Show Full Details" button
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JLabel titleLabel = new JLabel("All Players");
@@ -45,7 +44,6 @@ public class AllPlayers extends JFrame {
         JButton previousPageButton = new JButton("Previous Page");
         contentPane.add(previousPageButton, BorderLayout.SOUTH);
 
-        // Event Listener for the "Show Full Details" Button
         showDetailsButton.addActionListener(e -> {
             String idText = idInputField.getText().trim();
             if (!idText.matches("\\d+")) {
@@ -56,30 +54,7 @@ public class AllPlayers extends JFrame {
             showFullDetails(playerId);
         });
 
-        // Event Listener for the "Previous Page" Button
-        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-            public void eventDispatched(AWTEvent event) {
-                if (event instanceof MouseEvent) {
-                    MouseEvent me = (MouseEvent) event;
-                    if (me.getSource() == previousPageButton && me.getID() == MouseEvent.MOUSE_CLICKED) {
-                        goToPreviousPage();
-                    }
-                }
-            }
-        }, AWTEvent.MOUSE_EVENT_MASK);
-
-        // Double-click to show full details
-        playersTable.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int selectedRow = playersTable.getSelectedRow();
-                    if (selectedRow != -1) {
-                        int playerId = (int) playersTable.getValueAt(selectedRow, 0);
-                        showFullDetails(playerId);
-                    }
-                }
-            }
-        });
+        previousPageButton.addActionListener(e -> goToPreviousPage());
     }
 
     private void loadPlayersData() {
@@ -97,8 +72,9 @@ public class AllPlayers extends JFrame {
             while (rs.next()) {
                 int playerId = rs.getInt("ID");
                 String dbName = rs.getString("Name");
-
-                dbName = (dbName != null && !dbName.trim().isEmpty()) ? dbName : "Unknown";
+                if (dbName == null || dbName.trim().isEmpty()) {
+                    dbName = "Unknown";
+                }
                 Name playerName = new Name(dbName);
 
                 String level = rs.getString("competition_level");
@@ -142,7 +118,9 @@ public class AllPlayers extends JFrame {
 
             if (rs.next()) {
                 String dbName = rs.getString("Name");
-                dbName = (dbName != null && !dbName.trim().isEmpty()) ? dbName : "Unknown";
+                if (dbName == null || dbName.trim().isEmpty()) {
+                    dbName = "Unknown";
+                }
                 Name playerName = new Name(dbName);
 
                 String level = rs.getString("competition_level");
@@ -154,7 +132,6 @@ public class AllPlayers extends JFrame {
                 }
 
                 Competitor competitor = new Competitor(playerId, playerName, level, age, scores);
-
                 JOptionPane.showMessageDialog(null, competitor.getFullDetails(), "Player Details", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(null, "No player found with ID: " + playerId, "Not Found", JOptionPane.WARNING_MESSAGE);
