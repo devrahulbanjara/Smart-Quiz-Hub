@@ -19,35 +19,35 @@ class LoginPage extends JFrame {
         contentPane = new JPanel();
         setContentPane(contentPane);
         contentPane.setLayout(null);
-        
+
         JLabel loginLabel = new JLabel("Login Page");
         loginLabel.setBounds(180, 30, 100, 15);
         contentPane.add(loginLabel);
-        
+
         JLabel emailLabel = new JLabel("Email");
         emailLabel.setBounds(100, 90, 70, 15);
         contentPane.add(emailLabel);
-        
+
         JLabel passwordLabel = new JLabel("Password");
         passwordLabel.setBounds(100, 120, 90, 15);
         contentPane.add(passwordLabel);
-        
+
         emailTextField = new JTextField();
         emailTextField.setBounds(200, 90, 120, 20);
         contentPane.add(emailTextField);
-        
+
         passwordTextField = new JPasswordField();
         passwordTextField.setBounds(200, 120, 120, 20);
         contentPane.add(passwordTextField);
-        
+
         playerRadioButton = new JRadioButton("Player", true);
         playerRadioButton.setBounds(100, 150, 100, 20);
         contentPane.add(playerRadioButton);
-        
+
         adminRadioButton = new JRadioButton("Admin");
         adminRadioButton.setBounds(220, 150, 100, 20);
         contentPane.add(adminRadioButton);
-        
+
         ButtonGroup roleGroup = new ButtonGroup();
         roleGroup.add(playerRadioButton);
         roleGroup.add(adminRadioButton);
@@ -64,11 +64,11 @@ class LoginPage extends JFrame {
         JButton loginButton = new JButton("Login");
         loginButton.setBounds(100, 220, 100, 25);
         contentPane.add(loginButton);
-        
+
         JButton registerButton = new JButton("Register");
         registerButton.setBounds(220, 220, 100, 25);
         contentPane.add(registerButton);
-        
+
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String email = emailTextField.getText();
@@ -78,6 +78,12 @@ class LoginPage extends JFrame {
                 if (playerRadioButton.isSelected()) {
                     Competitor competitor = fetchCompetitor(email, password, selectedLevel);
                     if (competitor != null) {
+                        // Check if the level selected is different from the saved level in the database
+                        if (!competitor.getCompetitionLevel().equals(selectedLevel)) {
+                            // Update the level in the database
+                            updateCompetitorLevel(competitor.getCompetitorID(), selectedLevel);
+                            competitor.setCompetitionLevel(selectedLevel); // Update in the app
+                        }
                         new PlayerHomePage(competitor).setVisible(true);
                         dispose();
                     } else {
@@ -93,7 +99,7 @@ class LoginPage extends JFrame {
                 }
             }
         });
-        
+
         registerButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new RegisterPage().setVisible(true);
@@ -105,11 +111,11 @@ class LoginPage extends JFrame {
     private boolean authenticateUser(String email, String password, String tableName) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM " + tableName + " WHERE Email = ? AND Password = ?")) {
-            
+
             stmt.setString(1, email);
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
-            
+
             return rs.next();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -126,14 +132,14 @@ class LoginPage extends JFrame {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                int competitorID = rs.getInt("ID");  
+                int competitorID = rs.getInt("ID");
                 String fullName = rs.getString("Name");
 
-                // Save the selected level to the database
+                // Save the selected level to the database if it's not already saved
                 saveCompetitorLevel(competitorID, selectedLevel);
 
-                Name name = new Name(fullName, "", "");  
-                return new Competitor(competitorID, name, selectedLevel, 0, new int[5]); // Set age to 0 or remove it completely
+                Name name = new Name(fullName, "", "");
+                return new Competitor(competitorID, name, selectedLevel, 0, new int[5]);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -141,8 +147,18 @@ class LoginPage extends JFrame {
         return null;
     }
 
-
     private void saveCompetitorLevel(int competitorID, String selectedLevel) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
+             PreparedStatement stmt = conn.prepareStatement("UPDATE player_details SET competition_level = ? WHERE ID = ?")) {
+            stmt.setString(1, selectedLevel);
+            stmt.setInt(2, competitorID);
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void updateCompetitorLevel(int competitorID, String selectedLevel) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
              PreparedStatement stmt = conn.prepareStatement("UPDATE player_details SET competition_level = ? WHERE ID = ?")) {
             stmt.setString(1, selectedLevel);

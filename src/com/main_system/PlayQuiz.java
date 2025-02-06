@@ -73,15 +73,20 @@ public class PlayQuiz extends JFrame {
 
     private boolean isCompetitorAlreadyPlayed() {
         try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM competitor_scores WHERE competitor_id = ?");
+            // Query to check if the player has already played the quiz with the selected level
+            PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT * FROM competitor_scores WHERE competitor_id = ? AND level = ?");
             stmt.setInt(1, competitor.getCompetitorID());
+            stmt.setString(2, selectedLevel); // Compare the level from the database
             ResultSet rs = stmt.executeQuery();
-            return rs.next();
+            
+            return rs.next();  // If there's a record, that means the player has already played the quiz at this level
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
+
 
     private void startQuiz() {
         // Select the level from the database based on the competitor's record
