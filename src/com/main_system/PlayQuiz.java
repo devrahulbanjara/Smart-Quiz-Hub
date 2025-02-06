@@ -3,6 +3,7 @@ package com.main_system;
 import java.sql.*;
 import java.util.*;
 import java.util.List;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -25,7 +26,7 @@ public class PlayQuiz extends JFrame {
     public PlayQuiz(Competitor competitor) {
         this.competitor = competitor;
         this.currentRound = 0;
-        this.roundScores = new int[totalRounds]; 
+        this.roundScores = new int[totalRounds];
         this.connection = establishConnection();
 
         setTitle("Play Quiz");
@@ -83,19 +84,12 @@ public class PlayQuiz extends JFrame {
     }
 
     private void startQuiz() {
-        if (selectedLevel == null) {
-            selectedLevel = selectLevel();
-        }
+        // Select the level from the database based on the competitor's record
+        selectedLevel = competitor.getCompetitionLevel();
         questions = fetchQuestions(selectedLevel);
         questionIndex = 0;
         roundScore = 0;
         showQuestion();
-    }
-
-    private String selectLevel() {
-        String[] levels = {"Beginner", "Intermediate", "Advanced"};
-        return (String) JOptionPane.showInputDialog(null, "Select Level:", "Quiz Level",
-                JOptionPane.QUESTION_MESSAGE, null, levels, levels[0]);
     }
 
     private List<Question> fetchQuestions(String level) {
@@ -133,7 +127,7 @@ public class PlayQuiz extends JFrame {
             optionButtons[2].setText(q.getOption3());
             optionButtons[3].setText(q.getOption4());
         } else {
-            roundScores[currentRound] = roundScore; 
+            roundScores[currentRound] = roundScore;
             currentRound++;
 
             if (currentRound < totalRounds) {
@@ -143,10 +137,34 @@ public class PlayQuiz extends JFrame {
                 questions = fetchQuestions(selectedLevel);
                 showQuestion();
             } else {
-                competitor.setScores(roundScores);  
-                int overallScore = competitor.getOverallScore(); 
-                saveScoresToDatabase(overallScore);  
-                JOptionPane.showMessageDialog(null, "Quiz completed! Your final overall score: " + overallScore);
+                competitor.setScores(roundScores);
+                int overallScore = competitor.getOverallScore();
+
+                // Calculate the total number of correct answers and the total possible answers
+                int totalCorrectAnswers = 0;
+                for (int score : roundScores) {
+                    totalCorrectAnswers += score;
+                }
+
+                // Total possible answers is totalRounds * questionsPerRound
+                int totalPossibleAnswers = totalRounds * questionsPerRound;
+
+                // Calculate percentage
+                double overallPercentage = ((double) totalCorrectAnswers / totalPossibleAnswers) * 100;
+
+                saveScoresToDatabase(overallScore);
+
+                // Show scores for each round and overall percentage
+                StringBuilder resultMessage = new StringBuilder("Quiz completed!\nYour scores per round:\n");
+                for (int i = 0; i < totalRounds; i++) {
+                    resultMessage.append("Round ").append(i + 1).append(": ").append(roundScores[i]).append("/").append(questionsPerRound).append("\n");
+                }
+                resultMessage.append("\nOverall score: ").append(totalCorrectAnswers).append("/")
+                        .append(totalPossibleAnswers).append("\n")
+                        .append("Overall percentage: ").append(String.format("%.2f", overallPercentage)).append("%\n")
+                        .append("Difficulty level: ").append(selectedLevel);
+
+                JOptionPane.showMessageDialog(null, resultMessage.toString(), "Quiz Results", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             }
         }
@@ -168,7 +186,7 @@ public class PlayQuiz extends JFrame {
     private void saveScoresToDatabase(int overallScore) {
         try {
             PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                    "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             stmt.setInt(1, competitor.getCompetitorID());
             stmt.setString(2, competitor.getName().getFullName());
@@ -178,7 +196,7 @@ public class PlayQuiz extends JFrame {
             stmt.setInt(6, roundScores[2]);
             stmt.setInt(7, roundScores[3]);
             stmt.setInt(8, roundScores[4]);
-            stmt.setInt(9, overallScore);  
+            stmt.setInt(9, overallScore);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

@@ -23,14 +23,15 @@ public class AllPlayers extends JFrame {
         List<Competitor> competitors = getAllPlayersFromDatabase();
         
         // Prepare data to display in JTable
-        String[] columns = {"ID", "Full Details", "Short Details"};
+        String[] columns = {"Player ID", "Full Details", "Short Details"};
         Object[][] data = new Object[competitors.size()][3];
 
+        // Populate data for JTable using Competitor's methods
         for (int i = 0; i < competitors.size(); i++) {
             Competitor c = competitors.get(i);
             data[i][0] = c.getCompetitorID();
-            data[i][1] = c.getFullDetails();
-            data[i][2] = c.getShortDetails();
+            data[i][1] = c.getFullDetails();  // Full Details using getFullDetails() method
+            data[i][2] = c.getShortDetails();  // Short Details using getShortDetails() method
         }
 
         // Create table with data
