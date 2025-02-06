@@ -61,7 +61,7 @@ public class AllPlayers extends JFrame {
         String password = "3241";
         List<Competitor> competitors = new ArrayList<>();
         
-        String query = "SELECT p.ID, p.Name, p.Email, p.Password, c.competitionLevel, c.age, c.scores FROM player_details p JOIN competitor_scores c ON p.ID = c.competitor_id";
+        String query = "SELECT p.ID, p.Name, p.Email, p.Password, c.competition_level, c.age, c.scores FROM player_details p JOIN competitor_scores c ON p.ID = c.competitor_id";
         
         try (Connection connection = DriverManager.getConnection(url, username, password);
              Statement statement = connection.createStatement();
