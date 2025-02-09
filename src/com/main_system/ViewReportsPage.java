@@ -1,77 +1,133 @@
 package com.main_system;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.table.DefaultTableModel;
 
 public class ViewReportsPage extends JFrame {
-
-    private static final long serialVersionUID = 1L;
-    private JPanel contentPane;
-    private JTable table;
+    private QuizReportManager quizReportManager;
 
     public ViewReportsPage() {
-        setTitle("View Full Report");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 600, 400); 
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
-        contentPane.setLayout(new BorderLayout());
+        quizReportManager = new QuizReportManager();
+        setTitle("View Reports");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
 
+        // Create the panel for buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(2, 2));
+
+        // Create buttons
+        JButton fullReportButton = new JButton("Full Report");
+        JButton topPerformerButton = new JButton("Top Performer");
+        JButton statisticsButton = new JButton("Statistics");
+        JButton searchCompetitorButton = new JButton("Search Competitor");
+
+        // Add buttons to the panel
+        buttonPanel.add(fullReportButton);
+        buttonPanel.add(topPerformerButton);
+        buttonPanel.add(statisticsButton);
+        buttonPanel.add(searchCompetitorButton);
+
+        // Create the table to display results
         String[] columnNames = {"ID", "Name", "Age", "Level", "Overall Score"};
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-        table = new JTable(tableModel);
+        JTable resultTable = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(resultTable);
 
-        JScrollPane scrollPane = new JScrollPane(table);
-        contentPane.add(scrollPane, BorderLayout.CENTER);
+        // Add components to the main frame
+        add(buttonPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
 
+        // Create a panel for the "Previous Page" button and add it to the bottom
+        JPanel bottomPanel = new JPanel();
         JButton previousPageButton = new JButton("Previous Page");
-        previousPageButton.addActionListener(e -> {
-            new AdminHomePage().setVisible(true);
-            dispose();
-        });
-        contentPane.add(previousPageButton, BorderLayout.SOUTH);
+        bottomPanel.add(previousPageButton);
+        add(bottomPanel, BorderLayout.SOUTH);
 
-        displayFullReport();
-    }
+        // Set the action listeners for the buttons
+        fullReportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Fetch full report data
+                String fullReport = quizReportManager.generateFullReport();
+                tableModel.setRowCount(0); // Clear previous results
+                String[] data = fullReport.split("\n");
 
-    private void displayFullReport() {
-        try (Connection connection = establishConnection()) {
-            String query = "SELECT p.ID, p.Name, p.Age, p.competition_level, s.overall_score FROM player_details p " +
-                           "INNER JOIN competitor_scores s ON p.ID = s.competitor_id";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
-
-            DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
-
-            while (rs.next()) {
-                int id = rs.getInt("ID");
-                String name = rs.getString("Name");
-                int age = rs.getInt("Age");
-                String level = rs.getString("competition_level");
-                int overallScore = rs.getInt("overall_score");
-
-                tableModel.addRow(new Object[]{id, name, age, level, overallScore});
+                for (int i = 1; i < data.length; i++) {
+                    String[] rowData = data[i].split(" \\| ");
+                    tableModel.addRow(rowData); // Add each row to the table
+                }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error fetching report data", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        });
+
+        topPerformerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String topPerformers = quizReportManager.displayTopPerformer();
+                tableModel.setRowCount(0); // Clear previous results
+                JOptionPane.showMessageDialog(ViewReportsPage.this, topPerformers);
+            }
+        });
+
+        statisticsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String statistics = quizReportManager.generateStatistics();
+                tableModel.setRowCount(0); // Clear previous results
+                JOptionPane.showMessageDialog(ViewReportsPage.this, statistics);
+            }
+        });
+
+        searchCompetitorButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String input = JOptionPane.showInputDialog("Enter Competitor ID:");
+                if (input != null && !input.isEmpty()) {
+                    try {
+                        int competitorId = Integer.parseInt(input);
+                        String result = quizReportManager.searchCompetitorById(competitorId);
+
+                        // Parse the result and display it in the table
+                        String[] data = result.split("\n");
+
+                        if (data.length > 0 && data[0].contains("Competitor Found")) {
+                            // Parse the result into table data
+                            String[] rowData = data[1].split(" \\| ");
+                            tableModel.setRowCount(0); // Clear previous results
+                            tableModel.addRow(rowData); // Add the competitor details as a row in the table
+                        } else {
+                            JOptionPane.showMessageDialog(ViewReportsPage.this, result);
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(ViewReportsPage.this, "Invalid ID entered.");
+                    }
+                }
+            }
+        });
+
+        previousPageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose(); 
+                new AdminHomePage().setVisible(true);
+            }
+        });
+
+
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
 
-    private Connection establishConnection() {
-        try {
-            String url = "jdbc:mysql://localhost:3306/SmartQuizHub";
-            String username = "root";
-            String password = "3241";
-            return DriverManager.getConnection(url, username, password);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Database connection failed!", "Error", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new ViewReportsPage();
+            }
+        });
     }
 }

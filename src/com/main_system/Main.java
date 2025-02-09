@@ -47,18 +47,22 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    reportManager.generateFullReport();
+                    // Display the full report in console
+                    System.out.println(reportManager.generateFullReport());
                     break;
                 case 2:
-                    reportManager.displayTopPerformer();
+                    // Display the top performer in console
+                    System.out.println(reportManager.displayTopPerformer());
                     break;
                 case 3:
-                    reportManager.generateStatistics();
+                    // Display the statistics in console
+                    System.out.println(reportManager.generateStatistics());
                     break;
                 case 4:
+                    // Search competitor by ID
                     System.out.print("Enter competitor ID: ");
                     int id = scanner.nextInt();
-                    reportManager.searchCompetitorById(id);
+                    System.out.println(reportManager.searchCompetitorById(id));
                     break;
                 case 5:
                     System.out.println("Exiting...");
