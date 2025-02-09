@@ -1,12 +1,12 @@
 package com.main_system;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 
 class LoginPage extends JFrame {
-    private JPanel contentPane;
     private JTextField emailTextField;
     private JPasswordField passwordTextField;
     private JRadioButton playerRadioButton;
@@ -14,51 +14,96 @@ class LoginPage extends JFrame {
 
     public LoginPage() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 450, 400);
-        contentPane = new JPanel();
-        setContentPane(contentPane);
-        contentPane.setLayout(null);
+        setTitle("Login Page");
+        setSize(500, 400);
+        setLocationRelativeTo(null); // Center the window
 
-        JLabel loginLabel = new JLabel("Login Page");
-        loginLabel.setBounds(195, 30, 100, 15);
-        contentPane.add(loginLabel);
+        // Main panel with a modern layout
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridBagLayout());
+        mainPanel.setBackground(new Color(245, 245, 245)); // Light gray background
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10); // Padding
 
-        JLabel emailLabel = new JLabel("Email");
-        emailLabel.setBounds(100, 90, 70, 15);
-        contentPane.add(emailLabel);
+        // Add a logo or image (optional)
+        ImageIcon logoIcon = new ImageIcon("path/to/logo.png"); // Replace with your logo path
+        JLabel logoLabel = new JLabel(logoIcon);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        mainPanel.add(logoLabel, gbc);
 
-        JLabel passwordLabel = new JLabel("Password");
-        passwordLabel.setBounds(100, 120, 90, 15);
-        contentPane.add(passwordLabel);
+        // Login label
+        JLabel loginLabel = new JLabel("Login");
+        loginLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        loginLabel.setForeground(new Color(33, 150, 243)); // Blue color
+        gbc.gridy = 1;
+        mainPanel.add(loginLabel, gbc);
 
-        emailTextField = new JTextField();
-        emailTextField.setBounds(200, 90, 120, 20);
-        contentPane.add(emailTextField);
+        // Email field
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        mainPanel.add(emailLabel, gbc);
 
-        passwordTextField = new JPasswordField();
-        passwordTextField.setBounds(200, 120, 120, 20);
-        contentPane.add(passwordTextField);
+        emailTextField = new JTextField(20);
+        emailTextField.setFont(new Font("Arial", Font.PLAIN, 14));
+        emailTextField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(189, 189, 189)),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10) // Padding
+        ));
+        gbc.gridx = 1;
+        mainPanel.add(emailTextField, gbc);
 
+        // Password field
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        mainPanel.add(passwordLabel, gbc);
+
+        passwordTextField = new JPasswordField(20);
+        passwordTextField.setFont(new Font("Arial", Font.PLAIN, 14));
+        passwordTextField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(189, 189, 189)),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10) // Padding
+        ));
+        gbc.gridx = 1;
+        mainPanel.add(passwordTextField, gbc);
+
+        // Role selection (Player/Admin)
+        JPanel rolePanel = new JPanel();
+        rolePanel.setBackground(new Color(245, 245, 245));
         playerRadioButton = new JRadioButton("Player", true);
-        playerRadioButton.setBounds(100, 150, 100, 20);
-        contentPane.add(playerRadioButton);
-
+        playerRadioButton.setFont(new Font("Arial", Font.PLAIN, 14));
         adminRadioButton = new JRadioButton("Admin");
-        adminRadioButton.setBounds(220, 150, 100, 20);
-        contentPane.add(adminRadioButton);
+        adminRadioButton.setFont(new Font("Arial", Font.PLAIN, 14));
 
         ButtonGroup roleGroup = new ButtonGroup();
         roleGroup.add(playerRadioButton);
         roleGroup.add(adminRadioButton);
 
+        rolePanel.add(playerRadioButton);
+        rolePanel.add(adminRadioButton);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        mainPanel.add(rolePanel, gbc);
+
+        // Login button
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(100, 220, 100, 25);
-        contentPane.add(loginButton);
+        styleButton(loginButton);
+        gbc.gridy = 5;
+        mainPanel.add(loginButton, gbc);
 
+        // Register button
         JButton registerButton = new JButton("Register");
-        registerButton.setBounds(220, 220, 100, 25);
-        contentPane.add(registerButton);
+        styleButton(registerButton);
+        gbc.gridy = 6;
+        mainPanel.add(registerButton, gbc);
 
+        // Add action listeners
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String email = emailTextField.getText();
@@ -89,6 +134,18 @@ class LoginPage extends JFrame {
                 dispose();
             }
         });
+
+        // Add main panel to the frame
+        add(mainPanel);
+    }
+
+    private void styleButton(JButton button) {
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setBackground(new Color(33, 150, 243)); // Blue color
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // Padding
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private boolean authenticateUser(String email, String password, String tableName) {
@@ -126,5 +183,11 @@ class LoginPage extends JFrame {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new LoginPage().setVisible(true);
+        });
     }
 }

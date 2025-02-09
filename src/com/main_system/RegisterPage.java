@@ -1,79 +1,98 @@
 package com.main_system;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.regex.*;
 
-import javax.swing.*;
-
 public class RegisterPage extends JFrame {
-	public JPanel contentPane;
+
+    private JPanel contentPane;
     public JTextField nameTextField;
     public JTextField emailTextField;
     public JPasswordField passwordTextField;
     public JTextField ageTextField;
-    public JComboBox<String> levelComboBox;
+    private JComboBox<String> levelComboBox;
+
+    private Color backgroundColor = new Color(255, 255, 255);
+    private Color primaryColor = new Color(66, 135, 245);
+    private Color labelColor = new Color(102, 102, 102);
+    private Color textFieldBackground = new Color(245, 245, 245);
+    private Font labelFont = new Font("SansSerif", Font.BOLD, 14);
+    private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
+    private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12); // Smaller font for the back button
+
 
     public RegisterPage() {
+        setTitle("Register");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 450, 400);
+        setBounds(100, 100, 500, 500);
         contentPane = new JPanel();
+        contentPane.setBackground(backgroundColor);
+        contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
-        contentPane.setLayout(null);
+        contentPane.setLayout(new BorderLayout());
 
-        JLabel registerLabel = new JLabel("Register Page");
-        registerLabel.setBounds(180, 30, 100, 15);
-        contentPane.add(registerLabel);
+        // Main Panel
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridLayout(6, 2, 10, 15));
+        mainPanel.setBackground(backgroundColor);
+        contentPane.add(mainPanel, BorderLayout.CENTER);
 
-        JLabel nameLabel = new JLabel("Full Name");
-        nameLabel.setBounds(100, 70, 70, 15);
-        contentPane.add(nameLabel);
+        // Register Label (centered at the top)
+        JLabel registerLabel = new JLabel("Create an Account");
+        registerLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
+        registerLabel.setForeground(primaryColor);
+        registerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        contentPane.add(registerLabel, BorderLayout.NORTH);
 
-        JLabel emailLabel = new JLabel("Email");
-        emailLabel.setBounds(100, 100, 70, 15);
-        contentPane.add(emailLabel);
+        // Labels
+        JLabel nameLabel = createLabel("Full Name:");
+        JLabel emailLabel = createLabel("Email:");
+        JLabel passwordLabel = createLabel("Password:");
+        JLabel ageLabel = createLabel("Age:");
+        JLabel levelLabel = createLabel("Level:");
 
-        JLabel passwordLabel = new JLabel("Password");
-        passwordLabel.setBounds(100, 130, 90, 15);
-        contentPane.add(passwordLabel);
-
-        JLabel ageLabel = new JLabel("Age");
-        ageLabel.setBounds(100, 160, 70, 15);
-        contentPane.add(ageLabel);
-
-        JLabel levelLabel = new JLabel("Level");
-        levelLabel.setBounds(100, 193, 136, 15);
-        contentPane.add(levelLabel);
-
-        nameTextField = new JTextField();
-        nameTextField.setBounds(200, 70, 120, 20);
-        contentPane.add(nameTextField);
-
-        emailTextField = new JTextField();
-        emailTextField.setBounds(200, 100, 120, 20);
-        contentPane.add(emailTextField);
-
-        passwordTextField = new JPasswordField();
-        passwordTextField.setBounds(200, 130, 120, 20);
-        contentPane.add(passwordTextField);
-
-        ageTextField = new JTextField();
-        ageTextField.setBounds(200, 160, 120, 20);
-        contentPane.add(ageTextField);
-
+        // Text Fields
+        nameTextField = createTextField();
+        emailTextField = createTextField();
+        passwordTextField = createPasswordField();
+        ageTextField = createTextField();
         levelComboBox = new JComboBox<>(new String[]{"Beginner", "Intermediate", "Advanced"});
-        levelComboBox.setBounds(200, 190, 120, 20);
-        contentPane.add(levelComboBox);
+        levelComboBox.setFont(inputFont);
+        levelComboBox.setBackground(textFieldBackground);  // Light grey
+        levelComboBox.setForeground(labelColor);
 
-        JButton registerButton = new JButton("Register");
-        registerButton.setBounds(100, 240, 120, 25);
-        contentPane.add(registerButton);
 
-        JButton loginButton = new JButton("Go to Login");
-        loginButton.setBounds(230, 240, 120, 25);
-        contentPane.add(loginButton);
+        // Add components to mainPanel
+        mainPanel.add(nameLabel);
+        mainPanel.add(nameTextField);
+        mainPanel.add(emailLabel);
+        mainPanel.add(emailTextField);
+        mainPanel.add(passwordLabel);
+        mainPanel.add(passwordTextField);
+        mainPanel.add(ageLabel);
+        mainPanel.add(ageTextField);
+        mainPanel.add(levelLabel);
+        mainPanel.add(levelComboBox);
 
+        // Button Panel
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 10)); // Align to the Right
+        buttonPanel.setBackground(backgroundColor);
+        contentPane.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Buttons
+        JButton loginButton = createBackButton("Go to Login");
+        JButton registerButton = createButton("Register"); // Register button on the right
+
+        buttonPanel.add(loginButton);
+        buttonPanel.add(registerButton);
+
+        // Action Listeners
         registerButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String name = nameTextField.getText().trim();
@@ -83,34 +102,34 @@ public class RegisterPage extends JFrame {
                 String selectedLevel = (String) levelComboBox.getSelectedItem();
 
                 if (name.isEmpty() || email.isEmpty() || password.isEmpty() || ageText.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "All fields are required.");
+                    JOptionPane.showMessageDialog(null, "All fields are required.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (!isValidName(name)) {
-                    JOptionPane.showMessageDialog(null, "Invalid name. First name and last name both required (eg. Sandeep Sharma).");
+                    JOptionPane.showMessageDialog(null, "Invalid name. First name and last name both required (e.g., Sandeep Sharma).", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (!isValidEmail(email)) {
-                    JOptionPane.showMessageDialog(null, "Invalid email format. Please enter a valid email.");
+                    JOptionPane.showMessageDialog(null, "Invalid email format. Please enter a valid email.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (!isValidPassword(password)) {
-                    JOptionPane.showMessageDialog(null, "Password must be at least 8 characters long.");
+                    JOptionPane.showMessageDialog(null, "Password must be at least 8 characters long.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 try {
                     int age = Integer.parseInt(ageText);
                     if (age < 0) {
-                        JOptionPane.showMessageDialog(null, "Age cannot be negative.");
+                        JOptionPane.showMessageDialog(null, "Age cannot be negative.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     registerUser(name, email, password, selectedLevel, age);
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "Please enter a valid age.");
+                    JOptionPane.showMessageDialog(null, "Please enter a valid age.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -121,6 +140,79 @@ public class RegisterPage extends JFrame {
                 dispose();
             }
         });
+
+        // Make the frame visible
+        setVisible(true);
+    }
+
+    // Helper methods for creating components with consistent styling
+    private JLabel createLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(labelFont);
+        label.setForeground(labelColor);  // Grey Label Color
+        return label;
+    }
+
+    private JTextField createTextField() {
+        JTextField textField = new JTextField();
+        textField.setFont(inputFont);
+        textField.setBackground(textFieldBackground);  // Light grey
+        textField.setForeground(labelColor);
+        textField.setCaretColor(primaryColor); // I added this for the cursor color
+        textField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // added some padding to make the text not so close to the border
+        return textField;
+    }
+
+    private JPasswordField createPasswordField() {
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setFont(inputFont);
+        passwordField.setBackground(textFieldBackground);  // Light grey
+        passwordField.setForeground(labelColor);
+        passwordField.setCaretColor(primaryColor); // I added this for the cursor color
+        passwordField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // added some padding to make the text not so close to the border
+        return passwordField;
+    }
+
+    private JButton createButton(String text) {
+        JButton button = new JButton(text);
+        button.setBackground(primaryColor);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("SansSerif", Font.BOLD, 14));
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR)); // added a hand cursor for better UX
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(button.getBackground().brighter());
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(primaryColor);
+            }
+        });
+        return button;
+    }
+
+    private JButton createBackButton(String text) {
+        JButton button = new JButton(text);
+        button.setFont(smallButtonFont);            
+        button.setBackground(backgroundColor);      // Transparent background
+        button.setForeground(primaryColor);        // Use primary color for text
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);              // Remove border
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Add hover effect (optional)
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setForeground(primaryColor.brighter());
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setForeground(primaryColor);
+            }
+        });
+        return button;
     }
 
     public boolean isValidName(String name) {
@@ -147,7 +239,7 @@ public class RegisterPage extends JFrame {
             checkStmt.setString(1, email);
             ResultSet rs = checkStmt.executeQuery();
             if (rs.next()) {
-                JOptionPane.showMessageDialog(null, "Email already exists. Redirecting to login page.");
+                JOptionPane.showMessageDialog(null, "Email already exists. Redirecting to login page.", "Registration Error", JOptionPane.ERROR_MESSAGE);
                 new LoginPage().setVisible(true);
                 dispose();
                 return;
@@ -178,7 +270,17 @@ public class RegisterPage extends JFrame {
             dispose();
         } catch (SQLException ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error in registration: " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Error in registration: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                RegisterPage frame = new RegisterPage();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

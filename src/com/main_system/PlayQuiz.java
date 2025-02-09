@@ -1,13 +1,12 @@
 package com.main_system;
 
+import java.awt.*;
+import java.awt.event.*;
 import java.sql.*;
 import java.util.*;
-import java.util.List;
-
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.plaf.basic.BasicButtonUI;
+import java.util.List;
 
 public class PlayQuiz extends JFrame {
     private Competitor competitor;
@@ -26,6 +25,14 @@ public class PlayQuiz extends JFrame {
     private JButton submitButton;
     private int totalCorrectAnswers;
 
+    // Theme
+    private Color backgroundColor = new Color(255, 255, 255);  // White
+    private Color primaryColor = new Color(66, 135, 245);      // Blue
+    private Color labelColor = new Color(102, 102, 102);        // Grey
+    private Font titleFont = new Font("SansSerif", Font.BOLD, 24);
+    private Font buttonFont = new Font("SansSerif", Font.BOLD, 14);
+    private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
+
     public PlayQuiz(Competitor competitor) {
         this.competitor = competitor;
         this.currentRound = 0;
@@ -39,21 +46,36 @@ public class PlayQuiz extends JFrame {
         setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel();
+        topPanel.setBackground(backgroundColor); // Apply background color
         questionLabel = new JLabel("Question");
+        questionLabel.setForeground(labelColor); // Apply label color
+        questionLabel.setFont(titleFont);       // Apply title font
         topPanel.add(questionLabel);
         add(topPanel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new GridLayout(4, 1));
+        centerPanel.setBackground(backgroundColor); // Apply background color
         optionButtons = new JRadioButton[4];
         optionsGroup = new ButtonGroup();
         for (int i = 0; i < 4; i++) {
             optionButtons[i] = new JRadioButton();
+            optionButtons[i].setBackground(backgroundColor);    // Apply background color
+            optionButtons[i].setForeground(labelColor);      // Apply label color
+            optionButtons[i].setFont(inputFont);               // Apply input font
             optionsGroup.add(optionButtons[i]);
             centerPanel.add(optionButtons[i]);
         }
         add(centerPanel, BorderLayout.CENTER);
 
         submitButton = new JButton("Submit");
+        submitButton.setUI(new BasicButtonUI());
+        submitButton.setBackground(primaryColor);  // Apply primary color
+        submitButton.setForeground(Color.WHITE);
+        submitButton.setFont(buttonFont); // Apply button font
+        submitButton.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(primaryColor, 2),
+                BorderFactory.createEmptyBorder(10, 20, 10, 20)
+        ));
         submitButton.addActionListener(new SubmitButtonListener());
         add(submitButton, BorderLayout.SOUTH);
 
@@ -151,9 +173,9 @@ public class PlayQuiz extends JFrame {
                 int overallScore = competitor.getOverallScore();
                 saveScoresToDatabase(overallScore);
                 double percentage = (double) totalCorrectAnswers / (totalRounds * questionsPerRound) * 100;
-                JOptionPane.showMessageDialog(null, 
+                JOptionPane.showMessageDialog(null,
                         "Quiz completed! Your overall score: " + overallScore + "%" + "\nTotal Correct Answers: " + totalCorrectAnswers +
-                        "\nPercentage: " + String.format("%.2f", percentage) + "%",
+                                "\nPercentage: " + String.format("%.2f", percentage) + "%",
                         "Quiz Results", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             }
@@ -181,7 +203,7 @@ public class PlayQuiz extends JFrame {
     private void saveScoresToDatabase(int overallScore) {
         try {
             PreparedStatement insertStmt = connection.prepareStatement(
-                "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             insertStmt.setInt(1, competitor.getCompetitorID());
             insertStmt.setString(2, competitor.getName().getFullName());
             insertStmt.setString(3, selectedLevel);

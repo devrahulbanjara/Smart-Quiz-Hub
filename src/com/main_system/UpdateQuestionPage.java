@@ -1,6 +1,8 @@
 package com.main_system;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
@@ -9,78 +11,121 @@ public class UpdateQuestionPage extends JFrame {
     private JPanel contentPane;
     private JTextField questionIdTextField, questionTextField, option1TextField, option2TextField, option3TextField, option4TextField;
     private JComboBox<String> correctOptionComboBox, levelComboBox;
+    private JButton btnGoToAdminHome;
+    private JButton btnShowQuestions;
+
+    // Minimalist Color Scheme (Same as other classes)
+    private Color backgroundColor = new Color(255, 255, 255);
+    private Color primaryColor = new Color(66, 135, 245);
+    private Color labelColor = new Color(102, 102, 102);
+    private Color textFieldBackground = new Color(245, 245, 245);
+    private Font titleFont = new Font("SansSerif", Font.BOLD, 24);
+    private Font labelFont = new Font("SansSerif", Font.BOLD, 14);
+    private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
+    private Font buttonFont = new Font("SansSerif", Font.BOLD, 14);
+    private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
 
     public UpdateQuestionPage() {
+        setTitle("Update Question");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 600, 450);
+        setBounds(100, 100, 650, 550); // Adjusted size
         contentPane = new JPanel();
+        contentPane.setBackground(backgroundColor);
+        contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
-        contentPane.setLayout(null);
+        contentPane.setLayout(new BorderLayout());
+
+        // Top Panel for Title
+        JPanel topPanel = new JPanel();
+        topPanel.setBackground(backgroundColor);
+        topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
+        contentPane.add(topPanel, BorderLayout.NORTH);
 
         JLabel updateQuestionLabel = new JLabel("Update Question");
-        updateQuestionLabel.setBounds(242, 12, 200, 30);
-        contentPane.add(updateQuestionLabel);
+        updateQuestionLabel.setFont(titleFont);
+        updateQuestionLabel.setForeground(primaryColor);
+        topPanel.add(updateQuestionLabel);
 
-        JLabel questionIdLabel = new JLabel("Question ID");
-        questionIdLabel.setBounds(50, 70, 100, 20);
-        contentPane.add(questionIdLabel);
-        questionIdTextField = new JTextField();
-        questionIdTextField.setBounds(160, 70, 68, 30);
-        contentPane.add(questionIdTextField);
+        // Center Panel for Input Fields
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(9, 2, 10, 10)); // Adjusted rows for Question ID
+        inputPanel.setBackground(backgroundColor);
+        contentPane.add(inputPanel, BorderLayout.CENTER);
 
-        JLabel questionTextLabel = new JLabel("Question Text");
-        questionTextLabel.setBounds(50, 110, 100, 20);
-        contentPane.add(questionTextLabel);
-        questionTextField = new JTextField();
-        questionTextField.setBounds(160, 110, 300, 30);
-        contentPane.add(questionTextField);
+        // Labels
+        JLabel questionIdLabel = createLabel("Question ID:");
+        JLabel questionTextLabel = createLabel("Question Text:");
+        JLabel option1Label = createLabel("Option 1:");
+        JLabel option2Label = createLabel("Option 2:");
+        JLabel option3Label = createLabel("Option 3:");
+        JLabel option4Label = createLabel("Option 4:");
+        JLabel correctOptionLabel = createLabel("Correct Option:");
+        JLabel levelLabel = createLabel("Level:");
 
-        JLabel option1Label = new JLabel("Option 1");
-        option1Label.setBounds(50, 150, 100, 20);
-        contentPane.add(option1Label);
-        option1TextField = new JTextField();
-        option1TextField.setBounds(160, 150, 300, 30);
-        contentPane.add(option1TextField);
+        // Text Fields
+        questionIdTextField = createTextField();
+        questionTextField = createTextField();
+        option1TextField = createTextField();
+        option2TextField = createTextField();
+        option3TextField = createTextField();
+        option4TextField = createTextField();
 
-        JLabel option2Label = new JLabel("Option 2");
-        option2Label.setBounds(50, 190, 100, 20);
-        contentPane.add(option2Label);
-        option2TextField = new JTextField();
-        option2TextField.setBounds(160, 190, 300, 30);
-        contentPane.add(option2TextField);
+        // Combo Boxes
+        correctOptionComboBox = new JComboBox<>(new String[]{"1", "2", "3", "4"});
+        correctOptionComboBox.setFont(inputFont);
+        correctOptionComboBox.setBackground(textFieldBackground);
+        correctOptionComboBox.setForeground(labelColor);
 
-        JLabel option3Label = new JLabel("Option 3");
-        option3Label.setBounds(50, 230, 100, 20);
-        contentPane.add(option3Label);
-        option3TextField = new JTextField();
-        option3TextField.setBounds(160, 230, 300, 30);
-        contentPane.add(option3TextField);
+        levelComboBox = new JComboBox<>(new String[]{"Beginner", "Intermediate", "Advanced"});
+        levelComboBox.setFont(inputFont);
+        levelComboBox.setBackground(textFieldBackground);
+        levelComboBox.setForeground(labelColor);
+        
+        btnShowQuestions = createButton("Show Questions");
 
-        JLabel option4Label = new JLabel("Option 4");
-        option4Label.setBounds(50, 270, 100, 20);
-        contentPane.add(option4Label);
-        option4TextField = new JTextField();
-        option4TextField.setBounds(160, 270, 300, 30);
-        contentPane.add(option4TextField);
 
-        JLabel correctOptionLabel = new JLabel("Correct Option");
-        correctOptionLabel.setBounds(50, 310, 100, 20);
-        contentPane.add(correctOptionLabel);
-        correctOptionComboBox = new JComboBox<>(new String[] {"1", "2", "3", "4"});
-        correctOptionComboBox.setBounds(160, 310, 60, 30);
-        contentPane.add(correctOptionComboBox);
+        // Add components to inputPanel
+        inputPanel.add(questionIdLabel);
+        inputPanel.add(questionIdTextField);
+        inputPanel.add(btnShowQuestions);
+        inputPanel.add(new JLabel(""));
 
-        JLabel levelLabel = new JLabel("Level");
-        levelLabel.setBounds(50, 350, 100, 20);
-        contentPane.add(levelLabel);
-        levelComboBox = new JComboBox<>(new String[] {"Beginner", "Intermediate", "Advanced"});
-        levelComboBox.setBounds(160, 350, 150, 30);
-        contentPane.add(levelComboBox);
+        inputPanel.add(questionTextLabel);
+        inputPanel.add(questionTextField);
 
-        JButton updateButton = new JButton("Update Question");
-        updateButton.setBounds(50, 400, 200, 30);
-        contentPane.add(updateButton);
+        inputPanel.add(option1Label);
+        inputPanel.add(option1TextField);
 
+        inputPanel.add(option2Label);
+        inputPanel.add(option2TextField);
+
+        inputPanel.add(option3Label);
+        inputPanel.add(option3TextField);
+
+        inputPanel.add(option4Label);
+        inputPanel.add(option4TextField);
+
+        inputPanel.add(correctOptionLabel);
+        inputPanel.add(correctOptionComboBox);
+
+        inputPanel.add(levelLabel);
+        inputPanel.add(levelComboBox);
+
+        // Button Panel
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 10)); // Aligned to the right
+        buttonPanel.setBackground(backgroundColor);
+        contentPane.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Buttons
+        JButton updateButton = createButton("Update Question");
+        btnGoToAdminHome = createBackButton("Go to Admin Home"); // "Go to Admin Home" button
+
+        buttonPanel.add(btnGoToAdminHome);
+        buttonPanel.add(updateButton);
+
+
+        // Action Listeners
         updateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -88,26 +133,81 @@ public class UpdateQuestionPage extends JFrame {
             }
         });
 
-        JButton previousPageButton = new JButton("Previous Page");
-        previousPageButton.setBounds(388, 371, 200, 30);
-        contentPane.add(previousPageButton);
-        
-        JButton btnNewButton = new JButton("Show Questions");
-        btnNewButton.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		new ShowQuestionsPage().setVisible(true);
-        	}
-        });
-        btnNewButton.setBounds(262, 64, 150, 33);
-        contentPane.add(btnNewButton);
-
-        previousPageButton.addActionListener(new ActionListener() {
+        btnGoToAdminHome.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new AdminHomePage().setVisible(true);
                 dispose();
             }
         });
+        
+        btnShowQuestions.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		new ShowQuestionsPage().setVisible(true);
+        	}
+        });
+
+        setVisible(true);
+    }
+
+    // Helper methods for creating components with consistent styling
+    private JLabel createLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(labelFont);
+        label.setForeground(labelColor);
+        return label;
+    }
+
+    private JTextField createTextField() {
+        JTextField textField = new JTextField();
+        textField.setFont(inputFont);
+        textField.setBackground(textFieldBackground);
+        textField.setForeground(labelColor);
+        textField.setCaretColor(primaryColor);
+        textField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        return textField;
+    }
+
+    private JButton createButton(String text) {
+        JButton button = new JButton(text);
+        button.setBackground(primaryColor);
+        button.setForeground(Color.WHITE);
+        button.setFont(buttonFont);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(button.getBackground().brighter());
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(primaryColor);
+            }
+        });
+        return button;
+    }
+
+    private JButton createBackButton(String text) {
+        JButton button = new JButton(text);
+        button.setFont(smallButtonFont);
+        button.setBackground(backgroundColor);
+        button.setForeground(primaryColor);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Add hover effect (optional)
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setForeground(primaryColor.brighter());
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setForeground(primaryColor);
+            }
+        });
+        return button;
     }
 
     private void updateQuestionInDatabase() {
@@ -121,7 +221,7 @@ public class UpdateQuestionPage extends JFrame {
         String level = (String) levelComboBox.getSelectedItem();
 
         if (questionId.isEmpty() || questionText.isEmpty() || option1.isEmpty() || option2.isEmpty() ||
-            option3.isEmpty() || option4.isEmpty() || correctOption.isEmpty() || level.isEmpty()) {
+                option3.isEmpty() || option4.isEmpty() || correctOption.isEmpty() || level.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Please fill in all the fields.");
             return;
         }
@@ -148,5 +248,15 @@ public class UpdateQuestionPage extends JFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error updating question: " + e.getMessage());
         }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UpdateQuestionPage frame = new UpdateQuestionPage();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

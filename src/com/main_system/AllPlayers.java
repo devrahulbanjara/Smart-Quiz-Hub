@@ -11,6 +11,15 @@ public class AllPlayers extends JFrame {
     private JTable playersTable;
     private Competitor competitorFromHomePage;
     private JTextField idInputField;
+
+    // Theme
+    private Color backgroundColor = new Color(255, 255, 255);
+    private Color primaryColor = new Color(66, 135, 245);
+    private Color labelColor = new Color(102, 102, 102);
+    private Font titleFont = new Font("SansSerif", Font.BOLD, 24);
+    private Font buttonFont = new Font("SansSerif", Font.BOLD, 14);
+    private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
+    private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
     
     public AllPlayers(Competitor competitorFromHomePage) {
         this.competitorFromHomePage = competitorFromHomePage;
@@ -18,31 +27,44 @@ public class AllPlayers extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 600, 400);
         JPanel contentPane = new JPanel();
+        contentPane.setBackground(backgroundColor);
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setBackground(backgroundColor);
 
         JLabel titleLabel = new JLabel("All Players");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setFont(titleFont); // Apply title font
+        titleLabel.setForeground(primaryColor); // Apply label color
         topPanel.add(titleLabel);
 
         idInputField = new JTextField(10);
+        idInputField.setFont(inputFont); // Apply input font
+        idInputField.setForeground(labelColor);
         topPanel.add(idInputField);
 
-        JButton showDetailsButton = new JButton("Show Full Details");
+        JButton showDetailsButton = createButton("Show Full Details");
         topPanel.add(showDetailsButton);
 
         contentPane.add(topPanel, BorderLayout.NORTH);
 
         playersTable = new JTable();
+        playersTable.setFont(inputFont);
+        playersTable.setForeground(labelColor);
         JScrollPane scrollPane = new JScrollPane(playersTable);
+        scrollPane.getViewport().setBackground(backgroundColor);
         contentPane.add(scrollPane, BorderLayout.CENTER);
 
         loadPlayersData();
 
-        JButton previousPageButton = new JButton("Previous Page");
-        contentPane.add(previousPageButton, BorderLayout.SOUTH);
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBackground(backgroundColor); // Apply background color
+        bottomPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        contentPane.add(bottomPanel, BorderLayout.SOUTH);
+
+        JButton backToHomeButton = createBackButton("Back to Home");
+        bottomPanel.add(backToHomeButton);
 
         showDetailsButton.addActionListener(e -> {
             String idText = idInputField.getText().trim();
@@ -54,7 +76,51 @@ public class AllPlayers extends JFrame {
             showFullDetails(playerId);
         });
 
-        previousPageButton.addActionListener(e -> goToPreviousPage());
+        backToHomeButton.addActionListener(e -> goToPreviousPage());
+    }
+
+    private JButton createButton(String text) {
+        JButton button = new JButton(text);
+        button.setBackground(primaryColor);
+        button.setForeground(Color.WHITE);
+        button.setFont(buttonFont);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+         // Add hover effect for buttons
+         button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(button.getBackground().brighter());
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(primaryColor);
+            }
+         });
+         
+         return button;
+    }
+
+    private JButton createBackButton(String text) {
+        JButton button = new JButton(text);
+        button.setFont(smallButtonFont);            
+        button.setBackground(backgroundColor);      
+        button.setForeground(primaryColor);        
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);              
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setForeground(primaryColor.brighter());
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setForeground(primaryColor);
+            }
+        });
+        return button;
     }
 
     private void loadPlayersData() {
@@ -64,8 +130,8 @@ public class AllPlayers extends JFrame {
 
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
             String query = "SELECT p.ID, p.Name, p.Email, p.competition_level, p.age, " +
-                           "c.score1, c.score2, c.score3, c.score4, c.score5 " +
-                           "FROM player_details p LEFT JOIN competitor_scores c ON p.ID = c.competitor_id";
+                    "c.score1, c.score2, c.score3, c.score4, c.score5 " +
+                    "FROM player_details p LEFT JOIN competitor_scores c ON p.ID = c.competitor_id";
             PreparedStatement stmt = conn.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
@@ -109,9 +175,9 @@ public class AllPlayers extends JFrame {
     private void showFullDetails(int playerId) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
             String query = "SELECT p.ID, p.Name, p.Email, p.competition_level, p.age, " +
-                           "c.score1, c.score2, c.score3, c.score4, c.score5 " +
-                           "FROM player_details p LEFT JOIN competitor_scores c ON p.ID = c.competitor_id " +
-                           "WHERE p.ID = ?";
+                    "c.score1, c.score2, c.score3, c.score4, c.score5 " +
+                    "FROM player_details p LEFT JOIN competitor_scores c ON p.ID = c.competitor_id " +
+                    "WHERE p.ID = ?";
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setInt(1, playerId);
             ResultSet rs = stmt.executeQuery();
