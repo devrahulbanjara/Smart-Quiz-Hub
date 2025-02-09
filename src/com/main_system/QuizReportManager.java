@@ -1,7 +1,6 @@
 package com.main_system;
 
 import java.sql.*;
-import java.util.*;
 
 public class QuizReportManager {
     private Connection connection;
@@ -24,7 +23,12 @@ public class QuizReportManager {
 
     public void generateFullReport() {
         try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT p.ID, p.Name, p.Age, p.competition_level, s.overall_score FROM player_details p INNER JOIN competitor_scores s ON p.ID = s.competitor_id");
+            PreparedStatement stmt = connection.prepareStatement(
+                "SELECT p.ID, p.Name, p.Age, p.competition_level, s.overall_score " +
+                "FROM player_details p " +
+                "INNER JOIN competitor_scores s ON p.ID = s.competitor_id"
+            );
+
             ResultSet rs = stmt.executeQuery();
             
             System.out.println("Full Report:");
@@ -68,14 +72,17 @@ public class QuizReportManager {
             ResultSet countRs = countStmt.executeQuery();
             countRs.next();
             int totalPlayers = countRs.getInt(1);
+            System.out.println("\nTotal number of players: " + totalPlayers);
 
             // Highest score per level
-            String statsQuery = "SELECT competition_level, MAX(overall_score) AS highest_score FROM competitor_scores GROUP BY competition_level";
+            String statsQuery = "SELECT p.competition_level, MAX(s.overall_score) AS highest_score " +
+                                 "FROM competitor_scores s " +
+                                 "JOIN player_details p ON s.competitor_id = p.ID " +
+                                 "GROUP BY p.competition_level";
             PreparedStatement statsStmt = connection.prepareStatement(statsQuery);
             ResultSet statsRs = statsStmt.executeQuery();
 
             System.out.println("\nStatistics:");
-            System.out.println("Total number of players: " + totalPlayers);
             while (statsRs.next()) {
                 String level = statsRs.getString("competition_level");
                 int highestScore = statsRs.getInt("highest_score");
@@ -88,8 +95,10 @@ public class QuizReportManager {
 
     public void searchCompetitorById(int competitorId) {
         try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT p.ID, p.Name, p.Age, p.competition_level, s.overall_score FROM player_details p " +
-                                                                   "INNER JOIN competitor_scores s ON p.ID = s.competitor_id WHERE p.ID = ?");
+            PreparedStatement stmt = connection.prepareStatement(
+                "SELECT p.ID, p.Name, p.Age, p.competition_level, s.overall_score FROM player_details p " +
+                "INNER JOIN competitor_scores s ON p.ID = s.competitor_id WHERE p.ID = ?"
+            );
             stmt.setInt(1, competitorId);
             ResultSet rs = stmt.executeQuery();
 
