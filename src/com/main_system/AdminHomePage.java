@@ -28,11 +28,11 @@ public class AdminHomePage extends JFrame {
         contentPane.add(btnAddQuestion);
 
         btnUpdateQuestion = new JButton("Update Question");
-        btnUpdateQuestion.setBounds(220, 80, 150, 30);
+        btnUpdateQuestion.setBounds(212, 80, 172, 30);
         contentPane.add(btnUpdateQuestion);
 
         btnDeleteQuestion = new JButton("Delete Question");
-        btnDeleteQuestion.setBounds(390, 80, 150, 30);
+        btnDeleteQuestion.setBounds(396, 80, 150, 30);
         contentPane.add(btnDeleteQuestion);
 
         btnViewReports = new JButton("View Reports");

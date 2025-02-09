@@ -13,12 +13,16 @@ class PlayerHomePage extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 350);
         contentPane = new JPanel();
-        setContentPane(contentPane);
         contentPane.setLayout(null);
-
-        JLabel homeLabel = new JLabel("Welcome to Player Home Page");
-        homeLabel.setBounds(150, 30, 200, 20);
+        setContentPane(contentPane);
+        
+        JLabel homeLabel = new JLabel("Welcome", SwingConstants.CENTER);
+        homeLabel.setBounds(100, 12, 250, 20);
         contentPane.add(homeLabel);
+
+        JLabel lblPlayerName = new JLabel(competitor.getName().getFullName(), SwingConstants.CENTER);
+        lblPlayerName.setBounds(50, 33, 350, 20);
+        contentPane.add(lblPlayerName);
 
         JButton viewHighScoresButton = new JButton("View High Scores");
         viewHighScoresButton.setBounds(137, 78, 176, 30);
@@ -32,27 +36,23 @@ class PlayerHomePage extends JFrame {
         viewPlayerDetailsButton.setBounds(137, 160, 176, 30);
         contentPane.add(viewPlayerDetailsButton);
 
-        // Back to Login Button
         JButton backToLoginButton = new JButton("Back to Login");
         backToLoginButton.setBounds(137, 200, 176, 30);
         contentPane.add(backToLoginButton);
-
-        // Action for View High Scores
+        
         viewHighScoresButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new HighScores(competitor).setVisible(true);  // Pass the competitor to HighScores
+                new HighScores(competitor).setVisible(true);
                 dispose();
             }
         });
 
-        // Action for Play Quiz (You can modify this action accordingly)
         playQuizButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new PlayQuiz(competitor);  // Assuming PlayQuiz requires Competitor object
+                new PlayQuiz(competitor);
             }
         });
 
-        // Action for View Player Details
         viewPlayerDetailsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new AllPlayers(competitor).setVisible(true);
@@ -60,7 +60,6 @@ class PlayerHomePage extends JFrame {
             }
         });
 
-        // Action for Back to Login
         backToLoginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new LoginPage().setVisible(true);

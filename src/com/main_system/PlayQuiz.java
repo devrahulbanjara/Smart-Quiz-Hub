@@ -17,16 +17,20 @@ public class PlayQuiz extends JFrame {
     private final int questionsPerRound = 5;
     private int[] roundScores;
     private JLabel questionLabel;
-    private JButton[] optionButtons;
+    private JRadioButton[] optionButtons;
+    private ButtonGroup optionsGroup;
     private List<Question> questions;
     private int questionIndex;
     private String selectedLevel;
     private int roundScore;
+    private JButton submitButton;
+    private int totalCorrectAnswers;
 
     public PlayQuiz(Competitor competitor) {
         this.competitor = competitor;
         this.currentRound = 0;
         this.roundScores = new int[totalRounds];
+        this.totalCorrectAnswers = 0;
         this.connection = establishConnection();
 
         setTitle("Play Quiz");
@@ -40,13 +44,18 @@ public class PlayQuiz extends JFrame {
         add(topPanel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new GridLayout(4, 1));
-        optionButtons = new JButton[4];
+        optionButtons = new JRadioButton[4];
+        optionsGroup = new ButtonGroup();
         for (int i = 0; i < 4; i++) {
-            optionButtons[i] = new JButton();
-            optionButtons[i].addActionListener(new OptionButtonListener());
+            optionButtons[i] = new JRadioButton();
+            optionsGroup.add(optionButtons[i]);
             centerPanel.add(optionButtons[i]);
         }
         add(centerPanel, BorderLayout.CENTER);
+
+        submitButton = new JButton("Submit");
+        submitButton.addActionListener(new SubmitButtonListener());
+        add(submitButton, BorderLayout.SOUTH);
 
         if (isCompetitorAlreadyPlayed()) {
             JOptionPane.showMessageDialog(null, "You have already played this quiz.", "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -73,23 +82,17 @@ public class PlayQuiz extends JFrame {
 
     private boolean isCompetitorAlreadyPlayed() {
         try {
-            // Query to check if the player has already played the quiz with the selected level
-            PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT * FROM competitor_scores WHERE competitor_id = ? AND level = ?");
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM competitor_scores WHERE competitor_id = ?");
             stmt.setInt(1, competitor.getCompetitorID());
-            stmt.setString(2, selectedLevel); // Compare the level from the database
             ResultSet rs = stmt.executeQuery();
-            
-            return rs.next();  // If there's a record, that means the player has already played the quiz at this level
+            return rs.next();  // If a record is found, return true
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-
     private void startQuiz() {
-        // Select the level from the database based on the competitor's record
         selectedLevel = competitor.getCompetitionLevel();
         questions = fetchQuestions(selectedLevel);
         questionIndex = 0;
@@ -101,9 +104,8 @@ public class PlayQuiz extends JFrame {
         List<Question> questions = new ArrayList<>();
         if (connection == null) return questions;
         try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM quiz_questions WHERE level = ? ORDER BY RAND() LIMIT ?");
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM quiz_questions WHERE level = ?");
             stmt.setString(1, level);
-            stmt.setInt(2, questionsPerRound);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 questions.add(new Question(
@@ -117,6 +119,8 @@ public class PlayQuiz extends JFrame {
                         rs.getString("level")
                 ));
             }
+            Collections.shuffle(questions);
+            return questions.subList(0, Math.min(questionsPerRound, questions.size()));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -131,6 +135,7 @@ public class PlayQuiz extends JFrame {
             optionButtons[1].setText(q.getOption2());
             optionButtons[2].setText(q.getOption3());
             optionButtons[3].setText(q.getOption4());
+            optionsGroup.clearSelection();
         } else {
             roundScores[currentRound] = roundScore;
             currentRound++;
@@ -144,65 +149,49 @@ public class PlayQuiz extends JFrame {
             } else {
                 competitor.setScores(roundScores);
                 int overallScore = competitor.getOverallScore();
-
-                // Calculate the total number of correct answers and the total possible answers
-                int totalCorrectAnswers = 0;
-                for (int score : roundScores) {
-                    totalCorrectAnswers += score;
-                }
-
-                // Total possible answers is totalRounds * questionsPerRound
-                int totalPossibleAnswers = totalRounds * questionsPerRound;
-
-                // Calculate percentage
-                double overallPercentage = ((double) totalCorrectAnswers / totalPossibleAnswers) * 100;
-
                 saveScoresToDatabase(overallScore);
-
-                // Show scores for each round and overall percentage
-                StringBuilder resultMessage = new StringBuilder("Quiz completed!\nYour scores per round:\n");
-                for (int i = 0; i < totalRounds; i++) {
-                    resultMessage.append("Round ").append(i + 1).append(": ").append(roundScores[i]).append("/").append(questionsPerRound).append("\n");
-                }
-                resultMessage.append("\nOverall score: ").append(totalCorrectAnswers).append("/")
-                        .append(totalPossibleAnswers).append("\n")
-                        .append("Overall percentage: ").append(String.format("%.2f", overallPercentage)).append("%\n")
-                        .append("Difficulty level: ").append(selectedLevel);
-
-                JOptionPane.showMessageDialog(null, resultMessage.toString(), "Quiz Results", JOptionPane.INFORMATION_MESSAGE);
+                double percentage = (double) totalCorrectAnswers / (totalRounds * questionsPerRound) * 100;
+                JOptionPane.showMessageDialog(null, 
+                        "Quiz completed! Your overall score: " + overallScore + "%" + "\nTotal Correct Answers: " + totalCorrectAnswers +
+                        "\nPercentage: " + String.format("%.2f", percentage) + "%",
+                        "Quiz Results", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             }
         }
     }
 
-    private class OptionButtonListener implements ActionListener {
+    private class SubmitButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            JButton clickedButton = (JButton) e.getSource();
-            Question currentQuestion = questions.get(questionIndex);
-            int selectedAnswer = Arrays.asList(optionButtons).indexOf(clickedButton) + 1;
-            if (selectedAnswer == currentQuestion.getCorrectOption()) {
-                roundScore++;
+            for (int i = 0; i < optionButtons.length; i++) {
+                if (optionButtons[i].isSelected()) {
+                    Question currentQuestion = questions.get(questionIndex);
+                    if (i + 1 == currentQuestion.getCorrectOption()) {
+                        roundScore++;
+                        totalCorrectAnswers++;
+                    }
+                    questionIndex++;
+                    showQuestion();
+                    return;
+                }
             }
-            questionIndex++;
-            showQuestion();
+            JOptionPane.showMessageDialog(null, "Please select an answer before submitting.", "Warning", JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void saveScoresToDatabase(int overallScore) {
         try {
-            PreparedStatement stmt = connection.prepareStatement(
-                    "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            );
-            stmt.setInt(1, competitor.getCompetitorID());
-            stmt.setString(2, competitor.getName().getFullName());
-            stmt.setString(3, selectedLevel);
-            stmt.setInt(4, roundScores[0]);
-            stmt.setInt(5, roundScores[1]);
-            stmt.setInt(6, roundScores[2]);
-            stmt.setInt(7, roundScores[3]);
-            stmt.setInt(8, roundScores[4]);
-            stmt.setInt(9, overallScore);
-            stmt.executeUpdate();
+            PreparedStatement insertStmt = connection.prepareStatement(
+                "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            insertStmt.setInt(1, competitor.getCompetitorID());
+            insertStmt.setString(2, competitor.getName().getFullName());
+            insertStmt.setString(3, selectedLevel);
+            insertStmt.setInt(4, roundScores[0]);
+            insertStmt.setInt(5, roundScores[1]);
+            insertStmt.setInt(6, roundScores[2]);
+            insertStmt.setInt(7, roundScores[3]);
+            insertStmt.setInt(8, roundScores[4]);
+            insertStmt.setInt(9, overallScore);
+            insertStmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

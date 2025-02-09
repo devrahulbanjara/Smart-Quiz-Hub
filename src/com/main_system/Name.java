@@ -6,12 +6,25 @@ public class Name {
     private String lastName;
 
     public Name(String fullName) {
-        // Split the full name into parts: first, middle, and last
         String[] nameParts = fullName.split(" ");
-        
-        this.firstName = nameParts[0];
-        this.middleName = (nameParts.length > 2) ? nameParts[1] : "";  // Middle name is empty if not available
-        this.lastName = (nameParts.length > 1) ? nameParts[nameParts.length - 1] : ""; // Last name is the last part
+
+        if (nameParts.length > 0) {
+            this.firstName = nameParts[0];
+        } else {
+            this.firstName = "";
+        }
+
+        if (nameParts.length > 2) {
+            this.middleName = nameParts[1];
+        } else {
+            this.middleName = "";
+        }
+
+        if (nameParts.length > 1) {
+            this.lastName = nameParts[nameParts.length - 1];
+        } else {
+            this.lastName = "";
+        }
     }
 
     public String getFirstName() {
@@ -39,28 +52,34 @@ public class Name {
     }
 
     public String getFullName() {
-        return firstName + " " + middleName + " " + lastName;
+        StringBuilder fullName = new StringBuilder(firstName);
+
+        if (!middleName.isEmpty()) {
+            fullName.append(" ").append(middleName);
+        }
+
+        if (!lastName.isEmpty()) {
+            fullName.append(" ").append(lastName);
+        }
+
+        return fullName.toString();
     }
 
     public String getInitials() {
         StringBuilder initials = new StringBuilder();
 
-        // Ensure first name is not empty before accessing its first character
-        if (firstName != null && !firstName.isEmpty()) {
+        if (!firstName.isEmpty()) {
             initials.append(firstName.charAt(0));
         }
 
-        // Ensure middle name is not empty before accessing its first character
-        if (middleName != null && !middleName.isEmpty()) {
+        if (!middleName.isEmpty()) {
             initials.append(middleName.charAt(0));
         }
 
-        // Ensure last name is not empty before accessing its first character
-        if (lastName != null && !lastName.isEmpty()) {
+        if (!lastName.isEmpty()) {
             initials.append(lastName.charAt(0));
         }
 
         return initials.toString();
     }
-
 }

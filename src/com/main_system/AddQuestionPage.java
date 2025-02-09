@@ -7,8 +7,13 @@ import java.sql.*;
 
 public class AddQuestionPage extends JFrame {
     private JPanel contentPane;
-    private JTextField questionTextField, option1TextField, option2TextField, option3TextField, option4TextField;
-    private JComboBox<String> correctOptionComboBox, levelComboBox;
+    public JTextField questionTextField;
+	public JTextField option1TextField;
+	public JTextField option2TextField;
+	public JTextField option3TextField;
+	public JTextField option4TextField;
+    public JComboBox<String> correctOptionComboBox;
+	public JComboBox<String> levelComboBox;
 
     public AddQuestionPage() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -97,7 +102,7 @@ public class AddQuestionPage extends JFrame {
         });
     }
 
-    private void addQuestionToDatabase() {
+    public void addQuestionToDatabase() {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
             String query = "INSERT INTO quiz_questions (question_text, option_1, option_2, option_3, option_4, correct_option, level) VALUES (?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {

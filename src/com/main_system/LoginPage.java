@@ -11,7 +11,6 @@ class LoginPage extends JFrame {
     private JPasswordField passwordTextField;
     private JRadioButton playerRadioButton;
     private JRadioButton adminRadioButton;
-    private JComboBox<String> levelComboBox;
 
     public LoginPage() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -21,7 +20,7 @@ class LoginPage extends JFrame {
         contentPane.setLayout(null);
 
         JLabel loginLabel = new JLabel("Login Page");
-        loginLabel.setBounds(180, 30, 100, 15);
+        loginLabel.setBounds(195, 30, 100, 15);
         contentPane.add(loginLabel);
 
         JLabel emailLabel = new JLabel("Email");
@@ -52,15 +51,6 @@ class LoginPage extends JFrame {
         roleGroup.add(playerRadioButton);
         roleGroup.add(adminRadioButton);
 
-        JLabel levelLabel = new JLabel("Select Level");
-        levelLabel.setBounds(100, 180, 100, 20);
-        contentPane.add(levelLabel);
-
-        String[] levels = {"Beginner", "Intermediate", "Advanced"};
-        levelComboBox = new JComboBox<>(levels);
-        levelComboBox.setBounds(200, 180, 120, 20);
-        contentPane.add(levelComboBox);
-
         JButton loginButton = new JButton("Login");
         loginButton.setBounds(100, 220, 100, 25);
         contentPane.add(loginButton);
@@ -73,17 +63,10 @@ class LoginPage extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String email = emailTextField.getText();
                 String password = new String(passwordTextField.getPassword());
-                String selectedLevel = (String) levelComboBox.getSelectedItem();
 
                 if (playerRadioButton.isSelected()) {
-                    Competitor competitor = fetchCompetitor(email, password, selectedLevel);
+                    Competitor competitor = fetchCompetitor(email, password);
                     if (competitor != null) {
-                        // Check if the level selected is different from the saved level in the database
-                        if (!competitor.getCompetitionLevel().equals(selectedLevel)) {
-                            // Update the level in the database
-                            updateCompetitorLevel(competitor.getCompetitorID(), selectedLevel);
-                            competitor.setCompetitionLevel(selectedLevel); // Update in the app
-                        }
                         new PlayerHomePage(competitor).setVisible(true);
                         dispose();
                     } else {
@@ -123,7 +106,7 @@ class LoginPage extends JFrame {
         }
     }
 
-    private Competitor fetchCompetitor(String email, String password, String selectedLevel) {
+    private Competitor fetchCompetitor(String email, String password) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM player_details WHERE Email = ? AND Password = ?")) {
 
@@ -134,38 +117,14 @@ class LoginPage extends JFrame {
             if (rs.next()) {
                 int competitorID = rs.getInt("ID");
                 String fullName = rs.getString("Name");
-
-                // Save the selected level to the database if it's not already saved
-                saveCompetitorLevel(competitorID, selectedLevel);
+                String competitionLevel = rs.getString("competition_level");
 
                 Name name = new Name(fullName);
-                return new Competitor(competitorID, name, selectedLevel, 0, new int[5]);
+                return new Competitor(competitorID, name, competitionLevel, 0, new int[5]);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
         return null;
-    }
-
-    private void saveCompetitorLevel(int competitorID, String selectedLevel) {
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
-             PreparedStatement stmt = conn.prepareStatement("UPDATE player_details SET competition_level = ? WHERE ID = ?")) {
-            stmt.setString(1, selectedLevel);
-            stmt.setInt(2, competitorID);
-            stmt.executeUpdate();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    private void updateCompetitorLevel(int competitorID, String selectedLevel) {
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
-             PreparedStatement stmt = conn.prepareStatement("UPDATE player_details SET competition_level = ? WHERE ID = ?")) {
-            stmt.setString(1, selectedLevel);
-            stmt.setInt(2, competitorID);
-            stmt.executeUpdate();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
     }
 }
