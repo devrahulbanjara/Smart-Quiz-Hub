@@ -227,7 +227,7 @@ public class UpdateQuestionPage extends JFrame {
         }
 
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
-            String query = "UPDATE quiz_questions SET question_text = ?, option_1 = ?, option_2 = ?, option_3 = ?, option_4 = ?, correct_option = ?, level = ? WHERE id = ?";
+            String query = "UPDATE quiz_questions SET question_text = ?, option_1 = ?, option_2 = ?, option_3 = ?, option_4 = ?, correct_option = ?, level = ? WHERE question_id = ?";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, questionText);
                 stmt.setString(2, option1);

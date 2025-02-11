@@ -1,33 +1,16 @@
 package com.main_system;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Thread guiThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        LoginPage frame = new LoginPage();
-                        frame.setVisible(true);
-                    }
-                });
-            }
+        SwingUtilities.invokeLater(() -> {
+            LoginPage frame = new LoginPage();
+            frame.setVisible(true);
         });
 
-        Thread consoleThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                consoleMenu();
-            }
-        });
-
-        guiThread.start();
-        consoleThread.start();
+        consoleMenu();
     }
 
     private static void consoleMenu() {
@@ -41,36 +24,31 @@ public class Main {
             System.out.println("3) Generate Statistics");
             System.out.println("4) Search Competitor by ID");
             System.out.println("5) Exit");
-            System.out.println();
-            
-            int choice = scanner.nextInt();
 
-            switch (choice) {
-                case 1:
-                    // Display the full report in console
-                    System.out.println(reportManager.generateFullReport());
-                    break;
-                case 2:
-                    // Display the top performer in console
-                    System.out.println(reportManager.displayTopPerformer());
-                    break;
-                case 3:
-                    // Display the statistics in console
-                    System.out.println(reportManager.generateStatistics());
-                    break;
-                case 4:
-                    // Search competitor by ID
-                    System.out.print("Enter competitor ID: ");
-                    int id = scanner.nextInt();
-                    System.out.println(reportManager.searchCompetitorById(id));
-                    break;
-                case 5:
-                    System.out.println("Exiting...");
-                    scanner.close();
-                    System.exit(0);
-                    break;
-                default:
-                    System.out.println("Invalid choice, please try again.");
+            if (scanner.hasNextInt()) {
+                int choice = scanner.nextInt();
+
+                if (choice >= 1 && choice <= 5) {
+                    switch (choice) {
+                        case 1 -> System.out.println(reportManager.generateFullReport());
+                        case 2 -> System.out.println(reportManager.displayTopPerformer());
+                        case 3 -> System.out.println(reportManager.generateStatistics());
+                        case 4 -> {
+                            System.out.print("Enter competitor ID: ");
+                            int id = scanner.nextInt();
+                            System.out.println(reportManager.searchCompetitorById(id));
+                        }
+                        case 5 -> {
+                            System.out.println("Exiting...");
+                            System.exit(0);
+                        }
+                    }
+                } else {
+                    System.out.println("Invalid input, please input between 1 to 5.");
+                }
+            } else {
+                System.out.println("Invalid input, please input between 1 to 5.");
+                scanner.next();
             }
         }
     }
