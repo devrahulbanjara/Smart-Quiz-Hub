@@ -34,25 +34,24 @@ class PlayerHomePage extends JFrame {
         // Top Panel for Welcome Message
         JPanel topPanel = new JPanel();
         topPanel.setBackground(backgroundColor);
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS)); // Vertical layout
-        topPanel.setBorder(new EmptyBorder(0, 0, 20, 0)); // Padding below the panel
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.setBorder(new EmptyBorder(0, 0, 20, 0));
         contentPane.add(topPanel, BorderLayout.NORTH);
 
         JLabel homeLabel = new JLabel("Welcome", SwingConstants.CENTER);
         homeLabel.setFont(titleFont);
         homeLabel.setForeground(primaryColor);
-        homeLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the label
+        homeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         topPanel.add(homeLabel);
 
         JLabel lblPlayerName = new JLabel(competitor.getName().getFullName(), SwingConstants.CENTER);
         lblPlayerName.setFont(labelFont);
         lblPlayerName.setForeground(labelColor);
-        lblPlayerName.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the label
+        lblPlayerName.setAlignmentX(Component.CENTER_ALIGNMENT); 
         topPanel.add(lblPlayerName);
 
-        // Center Panel for Main Buttons
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(3, 1, 10, 20)); // 3 rows, 1 column, spacing
+        centerPanel.setLayout(new GridLayout(3, 1, 10, 20));
         centerPanel.setBackground(backgroundColor);
         contentPane.add(centerPanel, BorderLayout.CENTER);
 

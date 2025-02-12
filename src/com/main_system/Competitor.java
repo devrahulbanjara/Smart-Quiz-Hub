@@ -1,7 +1,5 @@
 package com.main_system;
 
-import java.util.Arrays;
-
 /**
  * Represents a competitor in the system.
  * Stores the details of a competitor including their ID, name, competition level, age, and scores.
@@ -45,6 +43,25 @@ public class Competitor {
         this.competitionLevel = competitionLevel;
         this.age = age;
         this.scores = scores;
+    }
+
+    /**
+     * Constructs a Competitor with the specified competitor ID, name, competition level, age, and overall score.
+     * The overall score is placed in the first element of the scores array.
+     *
+     * @param competitorID The ID of the competitor.
+     * @param name The name of the competitor.
+     * @param competitionLevel The competition level of the competitor.
+     * @param age The age of the competitor.
+     * @param overallScore The overall score for the competitor.
+     */
+    public Competitor(int competitorID, Name name, String competitionLevel, int age, int overallScore) {
+        this.competitorID = competitorID;
+        this.name = name;
+        this.competitionLevel = competitionLevel;
+        this.age = age;
+        this.scores = new int[5];  // assuming there are 5 scores (can be updated later)
+        this.scores[0] = overallScore;  // Storing the overall score in the first element
     }
 
     /**
@@ -138,10 +155,10 @@ public class Competitor {
     }
 
     /**
-     * Calculates and returns the overall score of the competitor based on their individual scores.
-     * The overall score is a percentage of the maximum possible score (each score is out of 5).
+     * Calculates and returns the overall score of the competitor as the sum of their individual scores.
+     * This method simply sums the values in the scores array and returns the result.
      *
-     * @return The overall score as a percentage.
+     * @return The sum of the individual scores (not percentage).
      */
     public int getOverallScore() {
         if (scores == null || scores.length == 0) {
@@ -149,13 +166,12 @@ public class Competitor {
         }
 
         int totalScore = 0;
-        int maxScore = scores.length * 5;
 
         for (int score : scores) {
             totalScore += score;
         }
 
-        return (int) Math.round(((double) totalScore / maxScore) * 100);
+        return totalScore;
     }
 
     /**

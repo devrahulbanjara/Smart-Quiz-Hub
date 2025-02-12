@@ -202,6 +202,12 @@ public class PlayQuiz extends JFrame {
 
     private void saveScoresToDatabase(int overallScore) {
         try {
+            // Calculate the percentage
+            double percentage = (double) totalCorrectAnswers / (totalRounds * questionsPerRound) * 100;
+            
+            // Convert the percentage to an integer (rounded to the nearest whole number)
+            int percentageScore = (int) Math.round(percentage);
+            
             PreparedStatement insertStmt = connection.prepareStatement(
                     "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             insertStmt.setInt(1, competitor.getCompetitorID());
@@ -212,10 +218,11 @@ public class PlayQuiz extends JFrame {
             insertStmt.setInt(6, roundScores[2]);
             insertStmt.setInt(7, roundScores[3]);
             insertStmt.setInt(8, roundScores[4]);
-            insertStmt.setInt(9, overallScore);
+            insertStmt.setInt(9, percentageScore); // Save the percentage
             insertStmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error saving scores to database.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

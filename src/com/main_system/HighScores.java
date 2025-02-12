@@ -13,10 +13,9 @@ import javax.swing.table.JTableHeader;
 
 class HighScores extends JFrame {
     private JPanel contentPane;
-    private Competitor competitor;  // Store competitor object
+    private Competitor competitor;
     private JButton btnGoBackHome;
 
-    // Minimalist Color Scheme (Consistent with other classes)
     private Color backgroundColor = new Color(255, 255, 255);
     private Color primaryColor = new Color(66, 135, 245);
     private Color labelColor = new Color(102, 102, 102);
@@ -27,49 +26,48 @@ class HighScores extends JFrame {
     private Font tableFont = new Font("SansSerif", Font.PLAIN, 14);
 
     public HighScores(Competitor competitor) {
-        this.competitor = competitor;  // Pass and store the competitor object
+        this.competitor = competitor;
 
         setTitle("High Scores");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 600, 500);
+        setBounds(100, 100, 800, 600);
         contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
-        // Top Panel for Title
         JPanel topPanel = new JPanel();
         topPanel.setBackground(backgroundColor);
         topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
         contentPane.add(topPanel, BorderLayout.NORTH);
 
-        JLabel titleLabel = new JLabel("Top 5 High Scores");
+        JLabel titleLabel = new JLabel("Top 3 High Scores by Level");
         titleLabel.setFont(titleFont);
         titleLabel.setForeground(primaryColor);
         topPanel.add(titleLabel);
 
-        // Center Panel for High Scores Table
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BorderLayout());
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBackground(backgroundColor);
 
-        // Table
         String[] columns = {"Name", "Level", "Overall Percentage"};
-        Object[][] data = getTopScoresFromDatabase();
-        DefaultTableModel tableModel = new DefaultTableModel(data, columns);
-        JTable highScoresTable = new JTable(tableModel);
-        highScoresTable.setFont(tableFont);
-        JTableHeader tableHeader = highScoresTable.getTableHeader();
-        tableHeader.setFont(tableFont);
-        highScoresTable.setRowHeight(30);
 
-        JScrollPane scrollPane = new JScrollPane(highScoresTable);
-        centerPanel.add(scrollPane, BorderLayout.CENTER);
+        // Create and add tables for each level
+        JTable beginnerTable = createHighScoresTable(getTopScoresFromDatabase("Beginner", 3), columns);
+        JTable intermediateTable = createHighScoresTable(getTopScoresFromDatabase("Intermediate", 3), columns);
+        JTable advancedTable = createHighScoresTable(getTopScoresFromDatabase("Advanced", 3), columns);
+
+        JScrollPane beginnerScrollPane = new JScrollPane(beginnerTable);
+        JScrollPane intermediateScrollPane = new JScrollPane(intermediateTable);
+        JScrollPane advancedScrollPane = new JScrollPane(advancedTable);
+
+        centerPanel.add(createTablePanel("Beginner Level", beginnerScrollPane));
+        centerPanel.add(createTablePanel("Intermediate Level", intermediateScrollPane));
+        centerPanel.add(createTablePanel("Advanced Level", advancedScrollPane));
 
         contentPane.add(centerPanel, BorderLayout.CENTER);
 
-        // Bottom Panel for Back to Home Button
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(backgroundColor);
         bottomPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -78,45 +76,31 @@ class HighScores extends JFrame {
         btnGoBackHome = createBackButton("Back to Home");
         bottomPanel.add(btnGoBackHome);
 
-
-        // ActionListener for the "Back to Home" button
         btnGoBackHome.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new PlayerHomePage(competitor).setVisible(true);  // Return to PlayerHomePage
-                dispose();  // Close current HighScores page
+                new PlayerHomePage(competitor).setVisible(true); 
+                dispose();
             }
         });
     }
 
+    private JPanel createTablePanel(String title, JScrollPane tableScrollPane) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.setBackground(backgroundColor);
+        
+        JLabel titleLabel = createLabel(title);
+        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(tableScrollPane, BorderLayout.CENTER);
+        
+        return panel;
+    }
 
-    // Helper Methods
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(titleFont);
         label.setForeground(primaryColor);
         return label;
-    }
-
-    private JButton createButton(String text) {
-        JButton button = new JButton(text);
-        button.setBackground(primaryColor);
-        button.setForeground(Color.WHITE);
-        button.setFont(buttonFont);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(button.getBackground().brighter());
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(primaryColor);
-            }
-        });
-
-        return button;
     }
 
     private JButton createBackButton(String text) {
@@ -128,7 +112,6 @@ class HighScores extends JFrame {
         button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Add hover effect (optional)
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setForeground(primaryColor.brighter());
@@ -141,23 +124,35 @@ class HighScores extends JFrame {
         return button;
     }
 
+    private JTable createHighScoresTable(Object[][] data, String[] columns) {
+        DefaultTableModel tableModel = new DefaultTableModel(data, columns);
+        JTable highScoresTable = new JTable(tableModel);
+        highScoresTable.setFont(tableFont);
+        JTableHeader tableHeader = highScoresTable.getTableHeader();
+        tableHeader.setFont(tableFont);
+        highScoresTable.setRowHeight(30);
+        return highScoresTable;
+    }
 
-    private Object[][] getTopScoresFromDatabase() {
+    private Object[][] getTopScoresFromDatabase(String level, int limit) {
         String url = "jdbc:mysql://localhost:3306/SmartQuizHub";
         String username = "root";
         String password = "3241";
         List<Object[]> scoresList = new ArrayList<>();
 
-        String query = "SELECT name, level, overall_score FROM competitor_scores ORDER BY overall_score DESC LIMIT 5";
+        String query = "SELECT name, level, overall_score FROM competitor_scores WHERE level = ? ORDER BY overall_score DESC LIMIT ?";
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, level);
+            statement.setInt(2, limit);
 
-            while (resultSet.next()) {
-                String name = resultSet.getString("name");
-                String level = resultSet.getString("level");
-                int overallScore = resultSet.getInt("overall_score");
-                scoresList.add(new Object[]{name, level, overallScore});
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String name = resultSet.getString("name");
+                    String scoreLevel = resultSet.getString("level");
+                    int overallScore = resultSet.getInt("overall_score");
+                    scoresList.add(new Object[]{name, scoreLevel, overallScore});
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -175,26 +175,33 @@ public class ViewReportsPage extends JFrame {
         return button;
     }
 
-    // Method to fetch full report and display
     private void fetchFullReport() {
         String fullReport = quizReportManager.generateFullReport();
-        tableModel.setRowCount(0); // Clear previous results
+        tableModel.setRowCount(0);
+        
+        // Split the report by new lines
         String[] data = fullReport.split("\n");
 
+        // Check if there are data lines after the title line
         if (data.length > 1) {
+            // Start from index 1 to skip the "Full Report:" line
             for (int i = 1; i < data.length; i++) {
-                String[] rowData = data[i].split(" \\| ");
-                tableModel.addRow(rowData); // Add each row to the table
+                // Trim extra spaces and split each line by " | "
+                String[] rowData = data[i].trim().split(" \\| ");
+                if (rowData.length == 5) { // Ensure we have all 5 columns
+                    tableModel.addRow(rowData);
+                }
             }
         } else {
             JOptionPane.showMessageDialog(ViewReportsPage.this, "No data available.", "Report Empty", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    // Method to display top performer
+
+
     private void displayTopPerformer() {
         String topPerformers = quizReportManager.displayTopPerformer();
-        tableModel.setRowCount(0); // Clear previous results
+        tableModel.setRowCount(0);
         JOptionPane.showMessageDialog(ViewReportsPage.this, topPerformers, "Top Performer", JOptionPane.INFORMATION_MESSAGE);
     }
 

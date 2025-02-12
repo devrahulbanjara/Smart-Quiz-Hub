@@ -172,7 +172,7 @@ public class DeleteQuestionPage extends JFrame {
         String username = "root";
         String password = "3241";
 
-        String sql = "DELETE FROM quiz_questions WHERE id = ?";
+        String sql = "DELETE FROM quiz_questions WHERE question_id = ?";
 
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {

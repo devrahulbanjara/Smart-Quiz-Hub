@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
+import java.util.regex.*;
 
 class LoginPage extends JFrame {
     private JTextField emailTextField;
@@ -103,21 +104,62 @@ class LoginPage extends JFrame {
         gbc.gridy = 6;
         mainPanel.add(registerButton, gbc);
 
-        // Add action listeners
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String email = emailTextField.getText();
                 String password = new String(passwordTextField.getPassword());
 
+                // Check if email or password is empty
+                if (email.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "None of the fields should be empty.");
+                    return;
+                }
+
+                // Validate email format
+                if (!isValidEmail(email)) {
+                    JOptionPane.showMessageDialog(null, "Invalid email format.");
+                    return;
+                }
+
+                // Validate password length
+                if (password.length() < 8) {
+                    JOptionPane.showMessageDialog(null, "Password must be at least 8 characters.");
+                    return;
+                }
+
                 if (playerRadioButton.isSelected()) {
-                    Competitor competitor = fetchCompetitor(email, password);
-                    if (competitor != null) {
-                        new PlayerHomePage(competitor).setVisible(true);
-                        dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Invalid user email or password.");
+                    // Fetch the password from the database and compare
+                    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
+                         PreparedStatement stmt = conn.prepareStatement("SELECT Password, ID, Name, competition_level FROM player_details WHERE Email = ?")) {
+
+                        stmt.setString(1, email);
+                        ResultSet rs = stmt.executeQuery();
+
+                        if (rs.next()) {
+                            String dbPassword = rs.getString("Password");
+
+                            if (password.equals(dbPassword)) {
+                                int competitorID = rs.getInt("ID");
+                                String fullName = rs.getString("Name");
+                                String competitionLevel = rs.getString("competition_level");
+
+                                Name name = new Name(fullName);
+                                Competitor competitor = new Competitor(competitorID, name, competitionLevel, 0, new int[5]);
+
+                                new PlayerHomePage(competitor).setVisible(true);
+                                dispose();
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Incorrect password.");
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Player has not registered.");
+                        }
+
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
                     }
                 } else {
+                    // Authenticate admin credentials
                     if (authenticateUser(email, password, "admin_details")) {
                         new AdminHomePage().setVisible(true);
                         dispose();
@@ -127,6 +169,10 @@ class LoginPage extends JFrame {
                 }
             }
         });
+
+
+
+
 
         registerButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -183,6 +229,14 @@ class LoginPage extends JFrame {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    private boolean isValidEmail(String email) {
+        // Simple email regex pattern
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 
     public static void main(String[] args) {

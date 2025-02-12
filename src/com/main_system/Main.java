@@ -18,6 +18,7 @@ public class Main {
         QuizReportManager reportManager = new QuizReportManager();
 
         while (true) {
+        	System.out.println("---Competitor Management System---");
             System.out.println("\nEnter your choice:");
             System.out.println("1) Generate Full Report");
             System.out.println("2) Display Top Performer");

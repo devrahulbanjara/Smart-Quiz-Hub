@@ -5,14 +5,12 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
-import java.util.Arrays;
 
 public class AllPlayers extends JFrame {
     private JTable playersTable;
     private Competitor competitorFromHomePage;
     private JTextField idInputField;
 
-    // Theme
     private Color backgroundColor = new Color(255, 255, 255);
     private Color primaryColor = new Color(66, 135, 245);
     private Color labelColor = new Color(102, 102, 102);
@@ -20,65 +18,84 @@ public class AllPlayers extends JFrame {
     private Font buttonFont = new Font("SansSerif", Font.BOLD, 14);
     private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
     private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
-    
+
     public AllPlayers(Competitor competitorFromHomePage) {
         this.competitorFromHomePage = competitorFromHomePage;
 
+        // Basic JFrame setup
+        setupFrame();
+
+        // Setup UI components
+        setupUIComponents();
+
+        // Load players data into the table
+        loadPlayersData();
+    }
+
+    // Setup JFrame details
+    private void setupFrame() {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 600, 400);
         JPanel contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
+    }
 
+    // Setup the UI components like buttons, labels, etc.
+    private void setupUIComponents() {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setBackground(backgroundColor);
 
-        JLabel titleLabel = new JLabel("All Players");
-        titleLabel.setFont(titleFont); // Apply title font
-        titleLabel.setForeground(primaryColor); // Apply label color
+        JLabel titleLabel = createLabel("All Players");
         topPanel.add(titleLabel);
 
-        idInputField = new JTextField(10);
-        idInputField.setFont(inputFont); // Apply input font
-        idInputField.setForeground(labelColor);
+        idInputField = createTextField();
         topPanel.add(idInputField);
 
         JButton showDetailsButton = createButton("Show Full Details");
         topPanel.add(showDetailsButton);
 
-        contentPane.add(topPanel, BorderLayout.NORTH);
+        getContentPane().add(topPanel, BorderLayout.NORTH);
 
         playersTable = new JTable();
         playersTable.setFont(inputFont);
         playersTable.setForeground(labelColor);
         JScrollPane scrollPane = new JScrollPane(playersTable);
         scrollPane.getViewport().setBackground(backgroundColor);
-        contentPane.add(scrollPane, BorderLayout.CENTER);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-        loadPlayersData();
-
+        // Bottom Panel
         JPanel bottomPanel = new JPanel();
-        bottomPanel.setBackground(backgroundColor); // Apply background color
+        bottomPanel.setBackground(backgroundColor);
         bottomPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        contentPane.add(bottomPanel, BorderLayout.SOUTH);
+        getContentPane().add(bottomPanel, BorderLayout.SOUTH);
 
         JButton backToHomeButton = createBackButton("Back to Home");
         bottomPanel.add(backToHomeButton);
 
-        showDetailsButton.addActionListener(e -> {
-            String idText = idInputField.getText().trim();
-            if (!idText.matches("\\d+")) {
-                JOptionPane.showMessageDialog(null, "Please enter a valid numeric ID.", "Invalid Input", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            int playerId = Integer.parseInt(idText);
-            showFullDetails(playerId);
-        });
-
+        // Event listeners
+        showDetailsButton.addActionListener(e -> onShowDetailsButtonClick());
         backToHomeButton.addActionListener(e -> goToPreviousPage());
     }
 
+    // Create a label with custom styling
+    private JLabel createLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(titleFont);
+        label.setForeground(primaryColor);
+        return label;
+    }
+
+    // Create a text field for ID input
+    private JTextField createTextField() {
+        JTextField textField = new JTextField(10);
+        textField.setFont(inputFont);
+        textField.setForeground(labelColor);
+        return textField;
+    }
+
+    // Create a button with custom styling
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setBackground(primaryColor);
@@ -87,35 +104,30 @@ public class AllPlayers extends JFrame {
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-         // Add hover effect for buttons
-         button.addMouseListener(new java.awt.event.MouseAdapter() {
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(button.getBackground().brighter());
             }
-
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(primaryColor);
             }
-         });
-         
-         return button;
+        });
+        return button;
     }
 
+    // Create the back button with custom styling
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(smallButtonFont);            
-        button.setBackground(backgroundColor);      
-        button.setForeground(primaryColor);        
+        button.setFont(smallButtonFont);
+        button.setBackground(backgroundColor);
+        button.setForeground(primaryColor);
         button.setFocusPainted(false);
-        button.setBorderPainted(false);              
+        button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setForeground(primaryColor.brighter());
             }
-
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setForeground(primaryColor);
             }
@@ -123,17 +135,36 @@ public class AllPlayers extends JFrame {
         return button;
     }
 
+    // Show full player details when button is clicked
+    private void onShowDetailsButtonClick() {
+        String idText = idInputField.getText().trim();
+        if (!idText.matches("\\d+")) {
+            JOptionPane.showMessageDialog(null, "Please enter a valid numeric ID.", "Invalid Input", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int playerId = Integer.parseInt(idText);
+        showFullDetails(playerId);
+    }
+
+    // Establish database connection
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
+    }
+
+    // Load all players data from the database
     private void loadPlayersData() {
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("ID");
         model.addColumn("Short Details");
 
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
-            String query = "SELECT p.ID, p.Name, p.Email, p.competition_level, p.age, " +
-                    "c.score1, c.score2, c.score3, c.score4, c.score5 " +
-                    "FROM player_details p LEFT JOIN competitor_scores c ON p.ID = c.competitor_id";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+        try (Connection conn = getConnection()) {
+            String query = "SELECT p.ID, p.Name, p.competition_level, p.age, " +
+                           "COALESCE(c.overall_score, 0) AS overall_score " +
+                           "FROM player_details p " +
+                           "LEFT JOIN competitor_scores c ON p.ID = c.competitor_id " +
+                           "ORDER BY p.ID ASC";
+
+            ResultSet rs = executeQuery(conn, query);
 
             while (rs.next()) {
                 int playerId = rs.getInt("ID");
@@ -144,36 +175,29 @@ public class AllPlayers extends JFrame {
                 Name playerName = new Name(dbName);
 
                 String level = rs.getString("competition_level");
-                int age = rs.getInt("age");
+                int overallScore = rs.getInt("overall_score");
 
-                int[] scores = new int[5];
-                boolean scoresExist = false;
-                for (int i = 1; i <= 5; i++) {
-                    int score = rs.getInt("score" + i);
-                    if (!rs.wasNull()) {
-                        scores[i - 1] = score;
-                        scoresExist = true;
-                    } else {
-                        scores[i - 1] = 0;
-                    }
-                }
-                if (!scoresExist) {
-                    Arrays.fill(scores, 0);
-                }
+                Competitor competitor = new Competitor(playerId, playerName, level, rs.getInt("age"), overallScore);
 
-                Competitor competitor = new Competitor(playerId, playerName, level, age, scores);
                 model.addRow(new Object[]{playerId, competitor.getShortDetails()});
             }
 
             playersTable.setModel(model);
+
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error loading players data: " + ex.getMessage());
         }
     }
 
+    // Execute a database query and return the result set
+    private ResultSet executeQuery(Connection conn, String query) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(query);
+        return stmt.executeQuery();
+    }
+
     private void showFullDetails(int playerId) {
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
+        try (Connection conn = getConnection()) {
             String query = "SELECT p.ID, p.Name, p.Email, p.competition_level, p.age, " +
                     "c.score1, c.score2, c.score3, c.score4, c.score5 " +
                     "FROM player_details p LEFT JOIN competitor_scores c ON p.ID = c.competitor_id " +
@@ -208,6 +232,7 @@ public class AllPlayers extends JFrame {
         }
     }
 
+    // Navigate back to the home page
     private void goToPreviousPage() {
         new PlayerHomePage(competitorFromHomePage).setVisible(true);
         dispose();
