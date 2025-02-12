@@ -2,13 +2,24 @@ package com.main_system;
 
 import java.sql.*;
 
+/**
+ * Manages the generation of quiz reports and statistics.
+ */
 public class QuizReportManager {
     private Connection connection;
 
+    /**
+     * Constructs a QuizReportManager object and establishes a database connection.
+     */
     public QuizReportManager() {
         this.connection = establishConnection();
     }
 
+    /**
+     * Establishes a connection to the database.
+     *
+     * @return A connection object to the database.
+     */
     private Connection establishConnection() {
         try {
             String url = "jdbc:mysql://localhost:3306/SmartQuizHub";
@@ -21,11 +32,26 @@ public class QuizReportManager {
         }
     }
 
+    /**
+     * Executes a query on the database.
+     *
+     * @param query The SQL query to execute.
+     * @return The result set from the query execution.
+     * @throws SQLException If a database access error occurs.
+     */
     private ResultSet executeQuery(String query) throws SQLException {
         PreparedStatement stmt = connection.prepareStatement(query);
         return stmt.executeQuery();
     }
 
+    /**
+     * Processes the result set and formats it into a string.
+     *
+     * @param rs     The result set to process.
+     * @param header The header to prepend to the result.
+     * @return A formatted string with the result set data.
+     * @throws SQLException If a database access error occurs.
+     */
     private StringBuilder handleResultSet(ResultSet rs, String header) throws SQLException {
         StringBuilder result = new StringBuilder();
         result.append(header).append("\n");
@@ -35,6 +61,13 @@ public class QuizReportManager {
         return result;
     }
 
+    /**
+     * Formats a single row of the result set.
+     *
+     * @param rs The result set to format.
+     * @return A formatted string representing the row.
+     * @throws SQLException If a database access error occurs.
+     */
     private String formatResultRow(ResultSet rs) throws SQLException {
         StringBuilder row = new StringBuilder();
         row.append(rs.getInt("ID")).append(" | ")
@@ -45,6 +78,11 @@ public class QuizReportManager {
         return row.toString();
     }
 
+    /**
+     * Generates a full report of all competitors and their scores.
+     *
+     * @return A string containing the full report.
+     */
     public String generateFullReport() {
         StringBuilder result = new StringBuilder();
         try {
@@ -57,7 +95,7 @@ public class QuizReportManager {
                            "FROM player_details p " +
                            "LEFT JOIN competitor_scores s ON p.ID = s.competitor_id";
             ResultSet rs = executeQuery(query);
-            
+
             result.append(handleResultSet(rs, ""));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -66,6 +104,11 @@ public class QuizReportManager {
         return result.toString();
     }
 
+    /**
+     * Displays the top performer for each competition level.
+     *
+     * @return A string containing the top performers by level.
+     */
     public String displayTopPerformer() {
         StringBuilder result = new StringBuilder();
         try {
@@ -91,6 +134,11 @@ public class QuizReportManager {
         return result.toString();
     }
 
+    /**
+     * Generates various statistics for the competition.
+     *
+     * @return A string containing various statistics about the competition.
+     */
     public String generateStatistics() {
         StringBuilder result = new StringBuilder();
         try {
@@ -154,7 +202,12 @@ public class QuizReportManager {
         return result.toString();
     }
 
-
+    /**
+     * Searches for a competitor by their ID.
+     *
+     * @param competitorId The ID of the competitor to search for.
+     * @return A string containing the details of the competitor, or an error message if not found.
+     */
     public String searchCompetitorById(int competitorId) {
         StringBuilder result = new StringBuilder();
         try {

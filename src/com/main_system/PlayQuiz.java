@@ -8,6 +8,9 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.util.List;
 
+/**
+ * This class represents the Play Quiz page where a competitor can play a quiz with multiple rounds.
+ */
 public class PlayQuiz extends JFrame {
     private Competitor competitor;
     private Connection connection;
@@ -25,14 +28,17 @@ public class PlayQuiz extends JFrame {
     private JButton submitButton;
     private int totalCorrectAnswers;
 
-    // Theme
-    private Color backgroundColor = new Color(255, 255, 255);  // White
-    private Color primaryColor = new Color(66, 135, 245);      // Blue
-    private Color labelColor = new Color(102, 102, 102);        // Grey
+    private Color backgroundColor = new Color(255, 255, 255);
+    private Color primaryColor = new Color(66, 135, 245);
+    private Color labelColor = new Color(102, 102, 102);
     private Font titleFont = new Font("SansSerif", Font.BOLD, 24);
     private Font buttonFont = new Font("SansSerif", Font.BOLD, 14);
     private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
 
+    /**
+     * Constructor to initialize the PlayQuiz page.
+     * @param competitor The competitor who is playing the quiz.
+     */
     public PlayQuiz(Competitor competitor) {
         this.competitor = competitor;
         this.currentRound = 0;
@@ -41,27 +47,29 @@ public class PlayQuiz extends JFrame {
         this.connection = establishConnection();
 
         setTitle("Play Quiz");
-        setSize(600, 400);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(true);        
+        setMinimumSize(new Dimension(800, 600));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel();
-        topPanel.setBackground(backgroundColor); // Apply background color
+        topPanel.setBackground(backgroundColor);
         questionLabel = new JLabel("Question");
-        questionLabel.setForeground(labelColor); // Apply label color
-        questionLabel.setFont(titleFont);       // Apply title font
+        questionLabel.setForeground(labelColor);
+        questionLabel.setFont(titleFont);
         topPanel.add(questionLabel);
         add(topPanel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new GridLayout(4, 1));
-        centerPanel.setBackground(backgroundColor); // Apply background color
+        centerPanel.setBackground(backgroundColor);
         optionButtons = new JRadioButton[4];
         optionsGroup = new ButtonGroup();
         for (int i = 0; i < 4; i++) {
             optionButtons[i] = new JRadioButton();
-            optionButtons[i].setBackground(backgroundColor);    // Apply background color
-            optionButtons[i].setForeground(labelColor);      // Apply label color
-            optionButtons[i].setFont(inputFont);               // Apply input font
+            optionButtons[i].setBackground(backgroundColor);
+            optionButtons[i].setForeground(labelColor);
+            optionButtons[i].setFont(inputFont);
             optionsGroup.add(optionButtons[i]);
             centerPanel.add(optionButtons[i]);
         }
@@ -69,9 +77,9 @@ public class PlayQuiz extends JFrame {
 
         submitButton = new JButton("Submit");
         submitButton.setUI(new BasicButtonUI());
-        submitButton.setBackground(primaryColor);  // Apply primary color
+        submitButton.setBackground(primaryColor);
         submitButton.setForeground(Color.WHITE);
-        submitButton.setFont(buttonFont); // Apply button font
+        submitButton.setFont(buttonFont);
         submitButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(primaryColor, 2),
                 BorderFactory.createEmptyBorder(10, 20, 10, 20)
@@ -89,6 +97,10 @@ public class PlayQuiz extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Establishes a connection to the MySQL database.
+     * @return The connection object.
+     */
     private Connection establishConnection() {
         try {
             String url = "jdbc:mysql://localhost:3306/SmartQuizHub";
@@ -102,18 +114,25 @@ public class PlayQuiz extends JFrame {
         }
     }
 
+    /**
+     * Checks if the competitor has already played the quiz.
+     * @return True if the competitor has already played, false otherwise.
+     */
     private boolean isCompetitorAlreadyPlayed() {
         try {
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM competitor_scores WHERE competitor_id = ?");
             stmt.setInt(1, competitor.getCompetitorID());
             ResultSet rs = stmt.executeQuery();
-            return rs.next();  // If a record is found, return true
+            return rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
 
+    /**
+     * Starts the quiz by fetching the questions for the competitor's level.
+     */
     private void startQuiz() {
         selectedLevel = competitor.getCompetitionLevel();
         questions = fetchQuestions(selectedLevel);
@@ -122,6 +141,11 @@ public class PlayQuiz extends JFrame {
         showQuestion();
     }
 
+    /**
+     * Fetches a list of questions based on the selected level.
+     * @param level The level of the quiz (easy, medium, hard).
+     * @return The list of questions for the selected level.
+     */
     private List<Question> fetchQuestions(String level) {
         List<Question> questions = new ArrayList<>();
         if (connection == null) return questions;
@@ -149,6 +173,9 @@ public class PlayQuiz extends JFrame {
         return questions;
     }
 
+    /**
+     * Displays the current question and its options.
+     */
     private void showQuestion() {
         if (questionIndex < questions.size()) {
             Question q = questions.get(questionIndex);
@@ -182,6 +209,9 @@ public class PlayQuiz extends JFrame {
         }
     }
 
+    /**
+     * Action listener for the submit button that checks the selected answer.
+     */
     private class SubmitButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             for (int i = 0; i < optionButtons.length; i++) {
@@ -200,13 +230,15 @@ public class PlayQuiz extends JFrame {
         }
     }
 
+    /**
+     * Saves the competitor's scores to the database.
+     * @param overallScore The competitor's overall score.
+     */
     private void saveScoresToDatabase(int overallScore) {
         try {
-            // Calculate the percentage
             double percentage = (double) totalCorrectAnswers / (totalRounds * questionsPerRound) * 100;
-            
             int percentageScore = (int) Math.round(percentage);
-            
+
             PreparedStatement insertStmt = connection.prepareStatement(
                     "INSERT INTO competitor_scores (competitor_id, name, level, score1, score2, score3, score4, score5, overall_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             insertStmt.setInt(1, competitor.getCompetitorID());
@@ -217,7 +249,7 @@ public class PlayQuiz extends JFrame {
             insertStmt.setInt(6, roundScores[2]);
             insertStmt.setInt(7, roundScores[3]);
             insertStmt.setInt(8, roundScores[4]);
-            insertStmt.setInt(9, percentageScore); // Save the percentage
+            insertStmt.setInt(9, percentageScore);
             insertStmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+/**
+ * The HighScores class displays the top high scores for different levels.
+ * It retrieves the scores from a database and displays them in tables.
+ */
 class HighScores extends JFrame {
     private JPanel contentPane;
     private Competitor competitor;
@@ -25,12 +29,19 @@ class HighScores extends JFrame {
     private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
     private Font tableFont = new Font("SansSerif", Font.PLAIN, 14);
 
+    /**
+     * Constructs the HighScores page with the given competitor.
+     * 
+     * @param competitor the competitor object whose high scores will be displayed
+     */
     public HighScores(Competitor competitor) {
         this.competitor = competitor;
 
         setTitle("High Scores");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(true);
+        setMinimumSize(new Dimension(800, 600));
         contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -53,7 +64,6 @@ class HighScores extends JFrame {
 
         String[] columns = {"Name", "Level", "Overall Percentage"};
 
-        // Create and add tables for each level
         JTable beginnerTable = createHighScoresTable(getTopScoresFromDatabase("Beginner", 3), columns);
         JTable intermediateTable = createHighScoresTable(getTopScoresFromDatabase("Intermediate", 3), columns);
         JTable advancedTable = createHighScoresTable(getTopScoresFromDatabase("Advanced", 3), columns);
@@ -76,26 +86,37 @@ class HighScores extends JFrame {
         btnGoBackHome = createBackButton("Back to Home");
         bottomPanel.add(btnGoBackHome);
 
-        btnGoBackHome.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new PlayerHomePage(competitor).setVisible(true); 
-                dispose();
-            }
+        btnGoBackHome.addActionListener(e -> {
+            new PlayerHomePage(competitor).setVisible(true);
+            dispose();
         });
     }
 
+    /**
+     * Creates a panel containing a table with a title.
+     * 
+     * @param title the title of the table
+     * @param tableScrollPane the scrollable table
+     * @return the created panel
+     */
     private JPanel createTablePanel(String title, JScrollPane tableScrollPane) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setBackground(backgroundColor);
-        
+
         JLabel titleLabel = createLabel(title);
         panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(tableScrollPane, BorderLayout.CENTER);
-        
+
         return panel;
     }
 
+    /**
+     * Creates a label with the specified text.
+     * 
+     * @param text the text of the label
+     * @return the created label
+     */
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(titleFont);
@@ -103,6 +124,12 @@ class HighScores extends JFrame {
         return label;
     }
 
+    /**
+     * Creates a button for navigating back to the home page.
+     * 
+     * @param text the text of the button
+     * @return the created button
+     */
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
         button.setFont(smallButtonFont);
@@ -124,6 +151,13 @@ class HighScores extends JFrame {
         return button;
     }
 
+    /**
+     * Creates a table for displaying high scores.
+     * 
+     * @param data the data to be displayed in the table
+     * @param columns the column names for the table
+     * @return the created table
+     */
     private JTable createHighScoresTable(Object[][] data, String[] columns) {
         DefaultTableModel tableModel = new DefaultTableModel(data, columns);
         JTable highScoresTable = new JTable(tableModel);
@@ -134,6 +168,13 @@ class HighScores extends JFrame {
         return highScoresTable;
     }
 
+    /**
+     * Retrieves the top high scores from the database for a specific level.
+     * 
+     * @param level the level of the scores to retrieve
+     * @param limit the maximum number of top scores to retrieve
+     * @return a 2D array containing the top scores
+     */
     private Object[][] getTopScoresFromDatabase(String level, int limit) {
         String url = "jdbc:mysql://localhost:3306/SmartQuizHub";
         String username = "root";

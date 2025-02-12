@@ -7,15 +7,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 
+/**
+ * This class represents the "Add Question" page for the admin to add new questions to the quiz system.
+ */
 public class AddQuestionPage extends JFrame {
     private JPanel contentPane;
     public JTextField questionTextField;
-	public JTextField option1TextField;
-	public JTextField option2TextField;
-	public JTextField option3TextField;
-	public JTextField option4TextField;
+    public JTextField option1TextField;
+    public JTextField option2TextField;
+    public JTextField option3TextField;
+    public JTextField option4TextField;
     public JComboBox<String> correctOptionComboBox;
-	public JComboBox<String> levelComboBox;
+    public JComboBox<String> levelComboBox;
     private JButton btnGoToAdminHome;
     private static final Color BACKGROUND_COLOR = new Color(255, 255, 255);
     private static final Color PRIMARY_COLOR = new Color(66, 135, 245);
@@ -27,10 +30,15 @@ public class AddQuestionPage extends JFrame {
     private static final Font BUTTON_FONT = new Font("SansSerif", Font.BOLD, 14);
     private static final Font SMALL_BUTTON_FONT = new Font("SansSerif", Font.PLAIN, 12);
 
+    /**
+     * Constructor that initializes the AddQuestionPage.
+     */
     public AddQuestionPage() {
         setTitle("Add Question");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(true); 
+
         contentPane = new JPanel(new BorderLayout());
         contentPane.setBackground(BACKGROUND_COLOR);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -73,14 +81,23 @@ public class AddQuestionPage extends JFrame {
         buttonPanel.add(btnGoToAdminHome);
         buttonPanel.add(saveButton);
 
-        saveButton.addActionListener(e -> addQuestionToDatabase());
-        btnGoToAdminHome.addActionListener(e -> {
-            new AdminHomePage().setVisible(true);
-            dispose();
+        saveButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addQuestionToDatabase();
+            }
+        });
+        
+        btnGoToAdminHome.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new AdminHomePage().setVisible(true);
+                dispose();
+            }
         });
 
+        setMinimumSize(new Dimension(800, 600));
         setVisible(true);
     }
+
 
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
@@ -147,6 +164,9 @@ public class AddQuestionPage extends JFrame {
         return button;
     }
 
+    /**
+     * Adds a new question to the database.
+     */
     public void addQuestionToDatabase() {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
             String query = "INSERT INTO quiz_questions (question_text, option_1, option_2, option_3, option_4, correct_option, level) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -164,9 +184,5 @@ public class AddQuestionPage extends JFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error adding question: " + e.getMessage());
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(AddQuestionPage::new);
     }
 }

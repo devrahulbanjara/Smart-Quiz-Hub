@@ -60,8 +60,8 @@ public class Competitor {
         this.name = name;
         this.competitionLevel = competitionLevel;
         this.age = age;
-        this.scores = new int[5];  // assuming there are 5 scores (can be updated later)
-        this.scores[0] = overallScore;  // Storing the overall score in the first element
+        this.scores = new int[5]; 
+        this.scores[0] = overallScore; 
     }
 
     /**

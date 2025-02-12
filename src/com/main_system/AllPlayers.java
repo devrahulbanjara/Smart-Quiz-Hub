@@ -6,6 +6,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
 
+/**
+ * JFrame to display all players with their short details and show full details for a specific player.
+ */
 public class AllPlayers extends JFrame {
     private JTable playersTable;
     private Competitor competitorFromHomePage;
@@ -19,30 +22,34 @@ public class AllPlayers extends JFrame {
     private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
     private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
 
+    /**
+     * Constructor to initialize AllPlayers frame.
+     * @param competitorFromHomePage The competitor object from the home page.
+     */
     public AllPlayers(Competitor competitorFromHomePage) {
         this.competitorFromHomePage = competitorFromHomePage;
-
-        // Basic JFrame setup
         setupFrame();
-
-        // Setup UI components
         setupUIComponents();
-
-        // Load players data into the table
         loadPlayersData();
     }
 
-    // Setup JFrame details
+    /**
+     * Setup JFrame properties.
+     */
     private void setupFrame() {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(true);        
+        setMinimumSize(new Dimension(800, 600));
         JPanel contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
     }
 
-    // Setup the UI components like buttons, labels, etc.
+    /**
+     * Setup the user interface components.
+     */
     private void setupUIComponents() {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setBackground(backgroundColor);
@@ -65,7 +72,6 @@ public class AllPlayers extends JFrame {
         scrollPane.getViewport().setBackground(backgroundColor);
         getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-        // Bottom Panel
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(backgroundColor);
         bottomPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -74,12 +80,15 @@ public class AllPlayers extends JFrame {
         JButton backToHomeButton = createBackButton("Back to Home");
         bottomPanel.add(backToHomeButton);
 
-        // Event listeners
         showDetailsButton.addActionListener(e -> onShowDetailsButtonClick());
         backToHomeButton.addActionListener(e -> goToPreviousPage());
     }
 
-    // Create a label with custom styling
+    /**
+     * Create a label with custom styling.
+     * @param text The text to display in the label.
+     * @return The created JLabel.
+     */
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(titleFont);
@@ -87,7 +96,10 @@ public class AllPlayers extends JFrame {
         return label;
     }
 
-    // Create a text field for ID input
+    /**
+     * Create a text field for ID input.
+     * @return The created JTextField.
+     */
     private JTextField createTextField() {
         JTextField textField = new JTextField(10);
         textField.setFont(inputFont);
@@ -95,7 +107,11 @@ public class AllPlayers extends JFrame {
         return textField;
     }
 
-    // Create a button with custom styling
+    /**
+     * Create a button with custom styling.
+     * @param text The text to display on the button.
+     * @return The created JButton.
+     */
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setBackground(primaryColor);
@@ -115,7 +131,11 @@ public class AllPlayers extends JFrame {
         return button;
     }
 
-    // Create the back button with custom styling
+    /**
+     * Create a back button with custom styling.
+     * @param text The text to display on the back button.
+     * @return The created JButton.
+     */
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
         button.setFont(smallButtonFont);
@@ -135,7 +155,10 @@ public class AllPlayers extends JFrame {
         return button;
     }
 
-    // Show full player details when button is clicked
+    /**
+     * Event handler for the "Show Full Details" button click.
+     * Validates input and displays full details of the player.
+     */
     private void onShowDetailsButtonClick() {
         String idText = idInputField.getText().trim();
         if (!idText.matches("\\d+")) {
@@ -146,12 +169,18 @@ public class AllPlayers extends JFrame {
         showFullDetails(playerId);
     }
 
-    // Establish database connection
+    /**
+     * Get the connection to the database.
+     * @return The connection object to the database.
+     * @throws SQLException if the connection fails.
+     */
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241");
     }
 
-    // Load all players data from the database
+    /**
+     * Load player data from the database and display it in the table.
+     */
     private void loadPlayersData() {
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("ID");
@@ -190,12 +219,22 @@ public class AllPlayers extends JFrame {
         }
     }
 
-    // Execute a database query and return the result set
+    /**
+     * Execute a query on the database.
+     * @param conn The database connection.
+     * @param query The SQL query to execute.
+     * @return The result set of the query.
+     * @throws SQLException if the query execution fails.
+     */
     private ResultSet executeQuery(Connection conn, String query) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(query);
         return stmt.executeQuery();
     }
 
+    /**
+     * Show full details of a specific player.
+     * @param playerId The ID of the player to fetch details for.
+     */
     private void showFullDetails(int playerId) {
         try (Connection conn = getConnection()) {
             String query = "SELECT p.ID, p.Name, p.Email, p.competition_level, p.age, " +
@@ -232,7 +271,9 @@ public class AllPlayers extends JFrame {
         }
     }
 
-    // Navigate back to the home page
+    /**
+     * Navigate back to the home page.
+     */
     private void goToPreviousPage() {
         new PlayerHomePage(competitorFromHomePage).setVisible(true);
         dispose();

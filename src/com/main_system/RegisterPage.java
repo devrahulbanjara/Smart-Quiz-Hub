@@ -8,6 +8,9 @@ import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.regex.*;
 
+/**
+ * Represents the registration page for the SmartQuizHub application.
+ */
 public class RegisterPage extends JFrame {
 
     private JPanel contentPane;
@@ -23,51 +26,51 @@ public class RegisterPage extends JFrame {
     private Color textFieldBackground = new Color(245, 245, 245);
     private Font labelFont = new Font("SansSerif", Font.BOLD, 14);
     private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
-    private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12); // Smaller font for the back button
+    private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
 
-
+    /**
+     * Constructs the RegisterPage frame.
+     */
     public RegisterPage() {
         setTitle("Register");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 500, 500);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(true);
+        setMinimumSize(new Dimension(800, 600));
+
         contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
-        // Main Panel
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(6, 2, 10, 15));
         mainPanel.setBackground(backgroundColor);
         contentPane.add(mainPanel, BorderLayout.CENTER);
 
-        // Register Label (centered at the top)
         JLabel registerLabel = new JLabel("Create an Account");
         registerLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         registerLabel.setForeground(primaryColor);
         registerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         contentPane.add(registerLabel, BorderLayout.NORTH);
 
-        // Labels
         JLabel nameLabel = createLabel("Full Name:");
         JLabel emailLabel = createLabel("Email:");
         JLabel passwordLabel = createLabel("Password:");
         JLabel ageLabel = createLabel("Age:");
         JLabel levelLabel = createLabel("Level:");
 
-        // Text Fields
         nameTextField = createTextField();
         emailTextField = createTextField();
         passwordTextField = createPasswordField();
         ageTextField = createTextField();
         levelComboBox = new JComboBox<>(new String[]{"Beginner", "Intermediate", "Advanced"});
         levelComboBox.setFont(inputFont);
-        levelComboBox.setBackground(textFieldBackground);  // Light grey
+        levelComboBox.setBackground(textFieldBackground);
         levelComboBox.setForeground(labelColor);
 
-
-        // Add components to mainPanel
         mainPanel.add(nameLabel);
         mainPanel.add(nameTextField);
         mainPanel.add(emailLabel);
@@ -79,100 +82,113 @@ public class RegisterPage extends JFrame {
         mainPanel.add(levelLabel);
         mainPanel.add(levelComboBox);
 
-        // Button Panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 10)); // Align to the Right
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 10));
         buttonPanel.setBackground(backgroundColor);
         contentPane.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Buttons
         JButton loginButton = createBackButton("Go to Login");
-        JButton registerButton = createButton("Register"); // Register button on the right
+        JButton registerButton = createButton("Register");
 
         buttonPanel.add(loginButton);
         buttonPanel.add(registerButton);
 
-        // Action Listeners
-        registerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String name = nameTextField.getText().trim();
-                String email = emailTextField.getText().trim();
-                String password = new String(passwordTextField.getPassword()).trim();
-                String ageText = ageTextField.getText().trim();
-                String selectedLevel = (String) levelComboBox.getSelectedItem();
+        registerButton.addActionListener(e -> {
+            String name = nameTextField.getText().trim();
+            String email = emailTextField.getText().trim();
+            String password = new String(passwordTextField.getPassword()).trim();
+            String ageText = ageTextField.getText().trim();
+            String selectedLevel = (String) levelComboBox.getSelectedItem();
 
-                if (name.isEmpty() || email.isEmpty() || password.isEmpty() || ageText.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "All fields are required.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || ageText.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "All fields are required.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!isValidName(name)) {
+                JOptionPane.showMessageDialog(null, "Invalid name. First name and last name both required (e.g., Sandeep Sharma).", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                JOptionPane.showMessageDialog(null, "Invalid email format. Please enter a valid email.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!isValidPassword(password)) {
+                JOptionPane.showMessageDialog(null, "Password must be at least 8 characters long.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                int age = Integer.parseInt(ageText);
+                if (age < 0) {
+                    JOptionPane.showMessageDialog(null, "Age cannot be negative.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-
-                if (!isValidName(name)) {
-                    JOptionPane.showMessageDialog(null, "Invalid name. First name and last name both required (e.g., Sandeep Sharma).", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                if (!isValidEmail(email)) {
-                    JOptionPane.showMessageDialog(null, "Invalid email format. Please enter a valid email.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                if (!isValidPassword(password)) {
-                    JOptionPane.showMessageDialog(null, "Password must be at least 8 characters long.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                try {
-                    int age = Integer.parseInt(ageText);
-                    if (age < 0) {
-                        JOptionPane.showMessageDialog(null, "Age cannot be negative.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    registerUser(name, email, password, selectedLevel, age);
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "Please enter a valid age.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                }
+                registerUser(name, email, password, selectedLevel, age);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Please enter a valid age.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        loginButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new LoginPage().setVisible(true);
-                dispose();
-            }
+        loginButton.addActionListener(e -> {
+            new LoginPage().setVisible(true);
+            dispose();
         });
 
-        // Make the frame visible
         setVisible(true);
     }
 
-    // Helper methods for creating components with consistent styling
+    /**
+     * Creates a JLabel with predefined styling.
+     *
+     * @param text The label text.
+     * @return A configured JLabel.
+     */
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(labelFont);
-        label.setForeground(labelColor);  // Grey Label Color
+        label.setForeground(labelColor);
         return label;
     }
 
+    /**
+     * Creates a JTextField with predefined styling.
+     *
+     * @return A configured JTextField.
+     */
     private JTextField createTextField() {
         JTextField textField = new JTextField();
         textField.setFont(inputFont);
-        textField.setBackground(textFieldBackground);  // Light grey
+        textField.setBackground(textFieldBackground);
         textField.setForeground(labelColor);
-        textField.setCaretColor(primaryColor); // I added this for the cursor color
-        textField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // added some padding to make the text not so close to the border
+        textField.setCaretColor(primaryColor);
+        textField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         return textField;
     }
 
+    /**
+     * Creates a JPasswordField with predefined styling.
+     *
+     * @return A configured JPasswordField.
+     */
     private JPasswordField createPasswordField() {
         JPasswordField passwordField = new JPasswordField();
         passwordField.setFont(inputFont);
-        passwordField.setBackground(textFieldBackground);  // Light grey
+        passwordField.setBackground(textFieldBackground);
         passwordField.setForeground(labelColor);
-        passwordField.setCaretColor(primaryColor); // I added this for the cursor color
-        passwordField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // added some padding to make the text not so close to the border
+        passwordField.setCaretColor(primaryColor);
+        passwordField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         return passwordField;
     }
 
+    /**
+     * Creates a JButton with predefined styling.
+     *
+     * @param text The button text.
+     * @return A configured JButton.
+     */
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setBackground(primaryColor);
@@ -180,7 +196,7 @@ public class RegisterPage extends JFrame {
         button.setFont(new Font("SansSerif", Font.BOLD, 14));
         button.setFocusPainted(false);
         button.setBorderPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR)); // added a hand cursor for better UX
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(button.getBackground().brighter());
@@ -193,16 +209,21 @@ public class RegisterPage extends JFrame {
         return button;
     }
 
+    /**
+     * Creates a back JButton with predefined styling.
+     *
+     * @param text The button text.
+     * @return A configured JButton for going back.
+     */
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(smallButtonFont);            
-        button.setBackground(backgroundColor);     
-        button.setForeground(primaryColor);        // Use primary color for text
+        button.setFont(smallButtonFont);
+        button.setBackground(backgroundColor);
+        button.setForeground(primaryColor);
         button.setFocusPainted(false);
-        button.setBorderPainted(false);              // Remove border
+        button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Add hover effect (optional)
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setForeground(primaryColor.brighter());
@@ -215,6 +236,12 @@ public class RegisterPage extends JFrame {
         return button;
     }
 
+    /**
+     * Validates the name to ensure it contains both first and last names.
+     *
+     * @param name The name to validate.
+     * @return True if the name is valid, false otherwise.
+     */
     public boolean isValidName(String name) {
         String nameRegex = "^[A-Za-z]+\\s[A-Za-z]+.*$";
         Pattern pattern = Pattern.compile(nameRegex);
@@ -222,6 +249,12 @@ public class RegisterPage extends JFrame {
         return matcher.matches();
     }
 
+    /**
+     * Validates the email address format.
+     *
+     * @param email The email to validate.
+     * @return True if the email is valid, false otherwise.
+     */
     public boolean isValidEmail(String email) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         Pattern pattern = Pattern.compile(emailRegex);
@@ -229,64 +262,49 @@ public class RegisterPage extends JFrame {
         return matcher.matches();
     }
 
+    /**
+     * Validates the password to ensure it is at least 8 characters long.
+     *
+     * @param password The password to validate.
+     * @return True if the password is valid, false otherwise.
+     */
     public boolean isValidPassword(String password) {
         return password.length() >= 8;
     }
 
+    /**
+     * Registers a new user by inserting their details into the database.
+     *
+     * @param name        The user's full name.
+     * @param email       The user's email address.
+     * @param password    The user's password.
+     * @param selectedLevel The competition level selected by the user.
+     * @param age         The user's age.
+     */
     public void registerUser(String name, String email, String password, String selectedLevel, int age) {
-        if (age < 0) {
-            JOptionPane.showMessageDialog(null, "Age cannot be negative.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        String url = "jdbc:mysql://localhost:3306/smartquizhub";
+        String username = "root";
+        String dbPassword = "root";
+
+        try (Connection connection = DriverManager.getConnection(url, username, dbPassword)) {
+            String query = "INSERT INTO users (name, email, password, level, age) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, name);
+                statement.setString(2, email);
+                statement.setString(3, password);
+                statement.setString(4, selectedLevel);
+                statement.setInt(5, age);
+                int rowsAffected = statement.executeUpdate();
+                if (rowsAffected > 0) {
+                    JOptionPane.showMessageDialog(null, "Registration successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    new LoginPage().setVisible(true);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Something went wrong. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error while registering: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
-            PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM player_details WHERE Email = ?");
-            checkStmt.setString(1, email);
-            ResultSet rs = checkStmt.executeQuery();
-            if (rs.next()) {
-                JOptionPane.showMessageDialog(null, "Email already exists. Redirecting to login page.", "Registration Error", JOptionPane.ERROR_MESSAGE);
-                new LoginPage().setVisible(true);
-                dispose();
-                return;
-            }
-
-            PreparedStatement insertStmt = conn.prepareStatement(
-                    "INSERT INTO player_details (Name, Email, Password, Competition_Level, Age) VALUES (?, ?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            insertStmt.setString(1, name);
-            insertStmt.setString(2, email);
-            insertStmt.setString(3, password);
-            insertStmt.setString(4, selectedLevel);
-            insertStmt.setInt(5, age);
-            insertStmt.executeUpdate();
-
-            ResultSet generatedKeys = insertStmt.getGeneratedKeys();
-            int competitorID = -1;
-            if (generatedKeys.next()) {
-                competitorID = generatedKeys.getInt(1);
-            }
-
-            Name playerName = new Name(name);
-            int[] defaultScores = {0, 0, 0, 0, 0};
-
-            Competitor competitor = new Competitor(competitorID, playerName, selectedLevel, age, defaultScores);
-            new PlayerHomePage(competitor).setVisible(true);
-            dispose();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error in registration: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                RegisterPage frame = new RegisterPage();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
     }
 }

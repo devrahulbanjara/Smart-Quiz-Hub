@@ -6,6 +6,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * AdminHomePage class that represents the home page of the admin interface.
+ */
 public class AdminHomePage extends JFrame {
     private JPanel contentPane;
     private JButton btnAddQuestion;
@@ -21,21 +24,25 @@ public class AdminHomePage extends JFrame {
     private Font buttonFont = new Font("SansSerif", Font.BOLD, 14);
     private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
 
-
+    /**
+     * Constructs the AdminHomePage window.
+     */
     public AdminHomePage() {
         setTitle("Admin Home");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(true);
+        setMinimumSize(new Dimension(800, 600));
+
         contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
-        // Top Panel for Title
         JPanel topPanel = new JPanel();
         topPanel.setBackground(backgroundColor);
-        topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20)); // Center alignment
+        topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
         contentPane.add(topPanel, BorderLayout.NORTH);
 
         JLabel lblAdminHome = new JLabel("Admin Home Page");
@@ -43,9 +50,8 @@ public class AdminHomePage extends JFrame {
         lblAdminHome.setForeground(primaryColor);
         topPanel.add(lblAdminHome);
 
-        // Center Panel for Buttons
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(4, 1, 10, 20)); // 4 rows, 1 column, spacing
+        centerPanel.setLayout(new GridLayout(4, 1, 10, 20));
         centerPanel.setBackground(backgroundColor);
         contentPane.add(centerPanel, BorderLayout.CENTER);
 
@@ -54,69 +60,54 @@ public class AdminHomePage extends JFrame {
         btnDeleteQuestion = createButton("Delete Question");
         btnViewReports = createButton("View Reports");
 
-
         centerPanel.add(btnAddQuestion);
         centerPanel.add(btnUpdateQuestion);
         centerPanel.add(btnDeleteQuestion);
         centerPanel.add(btnViewReports);
 
-
-        // Bottom Panel for Go To Login Button
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(backgroundColor);
-        bottomPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // Align to the left
-        bottomPanel.setBorder(new EmptyBorder(20, 0, 0, 0));  // Add top padding
+        bottomPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
         contentPane.add(bottomPanel, BorderLayout.SOUTH);
 
-
-        btnGoToLogin = createBackButton("Go to Login"); // Use createBackButton
+        btnGoToLogin = createBackButton("Go to Login");
         bottomPanel.add(btnGoToLogin);
 
-
-        // Action listeners
-        btnAddQuestion.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AddQuestionPage().setVisible(true);
-                dispose();
-            }
+        btnAddQuestion.addActionListener(e -> {
+            new AddQuestionPage().setVisible(true);
+            dispose();
         });
 
-        btnUpdateQuestion.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new UpdateQuestionPage().setVisible(true);
-                dispose();
-            }
+        btnUpdateQuestion.addActionListener(e -> {
+            new UpdateQuestionPage().setVisible(true);
+            dispose();
         });
 
-        btnDeleteQuestion.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new DeleteQuestionPage().setVisible(true);
-                dispose();
-            }
+        btnDeleteQuestion.addActionListener(e -> {
+            new DeleteQuestionPage().setVisible(true);
+            dispose();
         });
 
-        btnViewReports.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new ViewReportsPage().setVisible(true);
-                dispose();
-            }
+        btnViewReports.addActionListener(e -> {
+            new ViewReportsPage().setVisible(true);
+            dispose();
         });
 
-        btnGoToLogin.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new LoginPage().setVisible(true);
-                dispose();
-            }
+        btnGoToLogin.addActionListener(e -> {
+            new LoginPage().setVisible(true);
+            dispose();
         });
 
         setVisible(true);
     }
 
+    /**
+     * Creates a button with a specified text and styling.
+     *
+     * @param text The text to display on the button.
+     * @return The created JButton.
+     */
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setBackground(primaryColor);
@@ -137,17 +128,21 @@ public class AdminHomePage extends JFrame {
         return button;
     }
 
-
+    /**
+     * Creates a back button with a specified text and styling.
+     *
+     * @param text The text to display on the button.
+     * @return The created JButton.
+     */
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(smallButtonFont);            // Smaller font
-        button.setBackground(backgroundColor);      // Transparent background
-        button.setForeground(primaryColor);        // Use primary color for text
+        button.setFont(smallButtonFont);
+        button.setBackground(backgroundColor);
+        button.setForeground(primaryColor);
         button.setFocusPainted(false);
-        button.setBorderPainted(false);              // Remove border
+        button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Add hover effect (optional)
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setForeground(primaryColor.brighter());
@@ -158,15 +153,5 @@ public class AdminHomePage extends JFrame {
             }
         });
         return button;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                AdminHomePage frame = new AdminHomePage();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
     }
 }

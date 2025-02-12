@@ -7,6 +7,9 @@ import java.awt.event.*;
 import java.sql.*;
 import javax.swing.border.Border;
 
+/**
+ * Represents the page where quiz questions are displayed based on the selected level.
+ */
 public class ShowQuestionsPage extends JFrame {
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
@@ -14,7 +17,6 @@ public class ShowQuestionsPage extends JFrame {
     private JTextArea questionArea;
     private JButton btnGoBack;
 
-    // Minimalist Color Scheme (Consistent with other classes)
     private Color backgroundColor = new Color(255, 255, 255);
     private Color primaryColor = new Color(66, 135, 245);
     private Color labelColor = new Color(102, 102, 102);
@@ -25,17 +27,23 @@ public class ShowQuestionsPage extends JFrame {
     private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
     private Font textAreaFont = new Font("SansSerif", Font.PLAIN, 16);
 
+    /**
+     * Constructs the ShowQuestionsPage frame.
+     */
     public ShowQuestionsPage() {
         setTitle("Quiz Questions");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 600, 500); // Increased size
+        setBounds(100, 100, 600, 500);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(true);
+        setMinimumSize(new Dimension(800, 600));
+
         contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout(10, 10));
 
-        // Top Panel for Level Dropdown
         JPanel topPanel = new JPanel();
         topPanel.setBackground(backgroundColor);
         topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -52,7 +60,6 @@ public class ShowQuestionsPage extends JFrame {
         levelDropdown.addActionListener(e -> fetchQuestions());
         topPanel.add(levelDropdown);
 
-        // Center Panel for Question Area
         questionArea = new JTextArea();
         questionArea.setFont(textAreaFont);
         questionArea.setEditable(false);
@@ -65,7 +72,6 @@ public class ShowQuestionsPage extends JFrame {
         JScrollPane scrollPane = new JScrollPane(questionArea);
         contentPane.add(scrollPane, BorderLayout.CENTER);
 
-        // Bottom Panel for Back Button
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(backgroundColor);
         bottomPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -74,18 +80,17 @@ public class ShowQuestionsPage extends JFrame {
         btnGoBack = createBackButton("Go Back");
         bottomPanel.add(btnGoBack);
 
-        // Action Listener for Back Button
-        btnGoBack.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose(); // Just close the window, avoid creating new AdminHomePage
-            }
-        });
+        btnGoBack.addActionListener(e -> dispose());
 
-        // Initial fetch questions
         fetchQuestions();
     }
 
+    /**
+     * Creates a JLabel with predefined styling.
+     *
+     * @param text The text for the label.
+     * @return A configured JLabel.
+     */
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(labelFont);
@@ -93,6 +98,12 @@ public class ShowQuestionsPage extends JFrame {
         return label;
     }
 
+    /**
+     * Creates a JButton with predefined styling.
+     *
+     * @param text The text for the button.
+     * @return A configured JButton.
+     */
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setBackground(primaryColor);
@@ -113,6 +124,12 @@ public class ShowQuestionsPage extends JFrame {
         return button;
     }
 
+    /**
+     * Creates a back button with predefined styling.
+     *
+     * @param text The text for the back button.
+     * @return A configured JButton for going back.
+     */
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
         button.setFont(smallButtonFont);
@@ -134,6 +151,9 @@ public class ShowQuestionsPage extends JFrame {
         return button;
     }
 
+    /**
+     * Fetches and displays the questions from the database based on the selected level.
+     */
     private void fetchQuestions() {
         String selectedLevel = (String) levelDropdown.getSelectedItem();
         questionArea.setText("");
@@ -154,5 +174,4 @@ public class ShowQuestionsPage extends JFrame {
             JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 }

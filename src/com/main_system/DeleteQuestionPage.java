@@ -7,13 +7,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 
+/**
+ * JFrame for deleting a question from the database.
+ */
 public class DeleteQuestionPage extends JFrame {
     private JPanel contentPane;
     private JButton btnShowQuestions;
     private JTextField questionIdTextField;
     private JButton btnGoToAdminHome;
 
-    // Minimalist Color Scheme (Same as other classes)
     private Color backgroundColor = new Color(255, 255, 255);
     private Color primaryColor = new Color(66, 135, 245);
     private Color labelColor = new Color(102, 102, 102);
@@ -24,17 +26,20 @@ public class DeleteQuestionPage extends JFrame {
     private Font buttonFont = new Font("SansSerif", Font.BOLD, 14);
     private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
 
+    /**
+     * Constructor for the DeleteQuestionPage.
+     */
     public DeleteQuestionPage() {
         setTitle("Delete Question");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(true);
         contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout());
 
-        // Top Panel for Title
         JPanel topPanel = new JPanel();
         topPanel.setBackground(backgroundColor);
         topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
@@ -45,7 +50,6 @@ public class DeleteQuestionPage extends JFrame {
         deleteQuestionLabel.setForeground(primaryColor);
         topPanel.add(deleteQuestionLabel);
 
-        // Center Panel for Input Field
         JPanel centerPanel = new JPanel();
         centerPanel.setBackground(backgroundColor);
         centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
@@ -58,13 +62,11 @@ public class DeleteQuestionPage extends JFrame {
         questionIdTextField.setColumns(10);
         centerPanel.add(questionIdTextField);
 
-        // Button Panel
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(backgroundColor);
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 10));
         contentPane.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Buttons
         btnShowQuestions = createButton("Show Questions");
         JButton deleteButton = createButton("Delete Question");
         btnGoToAdminHome = createBackButton("Go to Admin Home");
@@ -73,8 +75,6 @@ public class DeleteQuestionPage extends JFrame {
         buttonPanel.add(deleteButton);
         buttonPanel.add(btnShowQuestions);
 
-
-        // Action Listeners
         btnShowQuestions.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -92,7 +92,6 @@ public class DeleteQuestionPage extends JFrame {
                     return;
                 }
 
-                // Check if the question ID is a valid positive integer
                 try {
                     int id = Integer.parseInt(questionId);
                     if (id <= 0) {
@@ -100,7 +99,6 @@ public class DeleteQuestionPage extends JFrame {
                         return;
                     }
 
-                    // Proceed to delete the question
                     deleteQuestion(String.valueOf(id));
 
                 } catch (NumberFormatException ex) {
@@ -109,7 +107,6 @@ public class DeleteQuestionPage extends JFrame {
             }
         });
 
-
         btnGoToAdminHome.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -117,11 +114,16 @@ public class DeleteQuestionPage extends JFrame {
                 dispose();
             }
         });
-
+        setMinimumSize(new Dimension(800, 600));
         setVisible(true);
     }
 
-    // Helper methods for creating components with consistent styling
+    /**
+     * Creates a JLabel with the specified text.
+     *
+     * @param text the text for the label
+     * @return a JLabel with the specified text
+     */
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(labelFont);
@@ -129,6 +131,11 @@ public class DeleteQuestionPage extends JFrame {
         return label;
     }
 
+    /**
+     * Creates a JTextField with consistent styling.
+     *
+     * @return a JTextField with consistent styling
+     */
     private JTextField createTextField() {
         JTextField textField = new JTextField();
         textField.setFont(inputFont);
@@ -139,6 +146,12 @@ public class DeleteQuestionPage extends JFrame {
         return textField;
     }
 
+    /**
+     * Creates a JButton with consistent styling.
+     *
+     * @param text the text on the button
+     * @return a JButton with consistent styling
+     */
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setBackground(primaryColor);
@@ -159,6 +172,12 @@ public class DeleteQuestionPage extends JFrame {
         return button;
     }
 
+    /**
+     * Creates a back button with consistent styling.
+     *
+     * @param text the text on the back button
+     * @return a JButton styled as a back button
+     */
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
         button.setFont(smallButtonFont);
@@ -168,7 +187,6 @@ public class DeleteQuestionPage extends JFrame {
         button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Add hover effect (optional)
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setForeground(primaryColor.brighter());
@@ -181,6 +199,11 @@ public class DeleteQuestionPage extends JFrame {
         return button;
     }
 
+    /**
+     * Deletes the question with the specified question ID from the database.
+     *
+     * @param questionId the ID of the question to delete
+     */
     private void deleteQuestion(String questionId) {
         String url = "jdbc:mysql://localhost:3306/SmartQuizHub";
         String username = "root";
