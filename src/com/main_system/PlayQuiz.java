@@ -205,7 +205,6 @@ public class PlayQuiz extends JFrame {
             // Calculate the percentage
             double percentage = (double) totalCorrectAnswers / (totalRounds * questionsPerRound) * 100;
             
-            // Convert the percentage to an integer (rounded to the nearest whole number)
             int percentageScore = (int) Math.round(percentage);
             
             PreparedStatement insertStmt = connection.prepareStatement(

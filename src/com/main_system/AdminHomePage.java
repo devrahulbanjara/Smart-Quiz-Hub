@@ -25,7 +25,7 @@ public class AdminHomePage extends JFrame {
     public AdminHomePage() {
         setTitle("Admin Home");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 600, 400);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));

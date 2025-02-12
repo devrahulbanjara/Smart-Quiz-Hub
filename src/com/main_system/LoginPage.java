@@ -171,9 +171,6 @@ class LoginPage extends JFrame {
         });
 
 
-
-
-
         registerButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new RegisterPage().setVisible(true);

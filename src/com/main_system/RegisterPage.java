@@ -196,7 +196,7 @@ public class RegisterPage extends JFrame {
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
         button.setFont(smallButtonFont);            
-        button.setBackground(backgroundColor);      // Transparent background
+        button.setBackground(backgroundColor);     
         button.setForeground(primaryColor);        // Use primary color for text
         button.setFocusPainted(false);
         button.setBorderPainted(false);              // Remove border
@@ -216,7 +216,7 @@ public class RegisterPage extends JFrame {
     }
 
     public boolean isValidName(String name) {
-        String nameRegex = "^[A-Za-z]+\\s[A-Za-z]+.*$"; // Ensures at least two words
+        String nameRegex = "^[A-Za-z]+\\s[A-Za-z]+.*$";
         Pattern pattern = Pattern.compile(nameRegex);
         Matcher matcher = pattern.matcher(name);
         return matcher.matches();
@@ -234,6 +234,11 @@ public class RegisterPage extends JFrame {
     }
 
     public void registerUser(String name, String email, String password, String selectedLevel, int age) {
+        if (age < 0) {
+            JOptionPane.showMessageDialog(null, "Age cannot be negative.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SmartQuizHub", "root", "3241")) {
             PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM player_details WHERE Email = ?");
             checkStmt.setString(1, email);
@@ -273,6 +278,7 @@ public class RegisterPage extends JFrame {
             JOptionPane.showMessageDialog(null, "Error in registration: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

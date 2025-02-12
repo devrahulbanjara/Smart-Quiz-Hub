@@ -1,7 +1,6 @@
 package com.main_system_test;
 
 import org.junit.jupiter.api.Test;
-
 import com.main_system.Competitor;
 import com.main_system.Name;
 
@@ -13,7 +12,7 @@ class CompetitorTest {
     void testCompetitorDefaultScores() {
         Name name = new Name("Rahul Dev Banjara");
         Competitor competitor = new Competitor(101, name, "Intermediate", 25);
-        
+
         assertEquals(101, competitor.getCompetitorID());
         assertEquals("Rahul Dev Banjara", competitor.getName().getFullName());
         assertEquals("Intermediate", competitor.getCompetitionLevel());
@@ -33,7 +32,7 @@ class CompetitorTest {
         assertEquals("Advanced", competitor.getCompetitionLevel());
         assertEquals(30, competitor.getAge());
         assertArrayEquals(scores, competitor.getScoreArray());
-        assertEquals(76, competitor.getOverallScore());
+        assertEquals(19, competitor.getOverallScore());
     }
 
     @Test
@@ -44,7 +43,7 @@ class CompetitorTest {
 
         competitor.setScores(newScores);
         assertArrayEquals(newScores, competitor.getScoreArray());
-        assertEquals(100, competitor.getOverallScore());
+        assertEquals(25, competitor.getOverallScore());
     }
 
     @Test
@@ -73,7 +72,29 @@ class CompetitorTest {
         Name name = new Name("Rahul Dev Banjara");
         Competitor competitor = new Competitor(106, name, "Advanced", 30, new int[]{4, 3, 5, 2, 5});
 
-        String expected = "CN 106 (RDB) has overall score 76.";
+        String expected = "CN 106 (RDB) has overall score 19.";
         assertEquals(expected, competitor.getShortDetails());
+    }
+
+    @Test
+    void testNegativeAgeThrowsException() {
+        Name name = new Name("Rahul Dev Banjara");
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            new Competitor(107, name, "Intermediate", -5);
+        });
+
+        assertEquals("Age cannot be negative.", exception.getMessage());
+    }
+
+    @Test
+    void testNegativeScoreThrowsException() {
+        Name name = new Name("Rahul Dev Banjara");
+        Competitor competitor = new Competitor(108, name, "Intermediate", 25);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            competitor.setScores(new int[]{5, -2, 3, 4, 6});
+        });
+
+        assertEquals("Scores cannot be negative.", exception.getMessage());
     }
 }

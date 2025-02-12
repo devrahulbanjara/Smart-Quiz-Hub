@@ -10,160 +10,108 @@ import java.sql.*;
 public class AddQuestionPage extends JFrame {
     private JPanel contentPane;
     public JTextField questionTextField;
-    public JTextField option1TextField;
-    public JTextField option2TextField;
-    public JTextField option3TextField;
-    public JTextField option4TextField;
+	public JTextField option1TextField;
+	public JTextField option2TextField;
+	public JTextField option3TextField;
+	public JTextField option4TextField;
     public JComboBox<String> correctOptionComboBox;
-    public JComboBox<String> levelComboBox;
+	public JComboBox<String> levelComboBox;
     private JButton btnGoToAdminHome;
-
-    // Minimalist Color Scheme (Same as RegisterPage, PlayerHomePage, AdminHomePage)
-    private Color backgroundColor = new Color(255, 255, 255);
-    private Color primaryColor = new Color(66, 135, 245);
-    private Color labelColor = new Color(102, 102, 102);
-    private Color textFieldBackground = new Color(245, 245, 245);
-    private Font titleFont = new Font("SansSerif", Font.BOLD, 24);
-    private Font labelFont = new Font("SansSerif", Font.BOLD, 14);
-    private Font inputFont = new Font("SansSerif", Font.PLAIN, 14);
-    private Font buttonFont = new Font("SansSerif", Font.BOLD, 14);
-    private Font smallButtonFont = new Font("SansSerif", Font.PLAIN, 12);
+    private static final Color BACKGROUND_COLOR = new Color(255, 255, 255);
+    private static final Color PRIMARY_COLOR = new Color(66, 135, 245);
+    private static final Color LABEL_COLOR = new Color(102, 102, 102);
+    private static final Color TEXTFIELD_BG = new Color(245, 245, 245);
+    private static final Font TITLE_FONT = new Font("SansSerif", Font.BOLD, 24);
+    private static final Font LABEL_FONT = new Font("SansSerif", Font.BOLD, 14);
+    private static final Font INPUT_FONT = new Font("SansSerif", Font.PLAIN, 14);
+    private static final Font BUTTON_FONT = new Font("SansSerif", Font.BOLD, 14);
+    private static final Font SMALL_BUTTON_FONT = new Font("SansSerif", Font.PLAIN, 12);
 
     public AddQuestionPage() {
         setTitle("Add Question");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 650, 500);  // Adjusted size
-        contentPane = new JPanel();
-        contentPane.setBackground(backgroundColor);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        contentPane = new JPanel(new BorderLayout());
+        contentPane.setBackground(BACKGROUND_COLOR);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
-        contentPane.setLayout(new BorderLayout());
 
-        // Top Panel for Title
-        JPanel topPanel = new JPanel();
-        topPanel.setBackground(backgroundColor);
-        topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 20));
+        topPanel.setBackground(BACKGROUND_COLOR);
+        JLabel addQuestionLabel = new JLabel("Add Question");
+        addQuestionLabel.setFont(TITLE_FONT);
+        addQuestionLabel.setForeground(PRIMARY_COLOR);
+        topPanel.add(addQuestionLabel);
         contentPane.add(topPanel, BorderLayout.NORTH);
 
-        JLabel addQuestionLabel = new JLabel("Add Question");
-        addQuestionLabel.setFont(titleFont);
-        addQuestionLabel.setForeground(primaryColor);
-        topPanel.add(addQuestionLabel);
-
-        // Center Panel for Input Fields
-        JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(8, 2, 10, 10)); // Adjusted rows for level
-        inputPanel.setBackground(backgroundColor);
+        JPanel inputPanel = new JPanel(new GridLayout(8, 2, 10, 10));
+        inputPanel.setBackground(BACKGROUND_COLOR);
         contentPane.add(inputPanel, BorderLayout.CENTER);
 
-        // Labels
-        JLabel questionTextLabel = createLabel("Question Text:");
-        JLabel option1Label = createLabel("Option 1:");
-        JLabel option2Label = createLabel("Option 2:");
-        JLabel option3Label = createLabel("Option 3:");
-        JLabel option4Label = createLabel("Option 4:");
-        JLabel correctOptionLabel = createLabel("Correct Option:");
-        JLabel levelLabel = createLabel("Level:");
-
-        // Text Fields
         questionTextField = createTextField();
         option1TextField = createTextField();
         option2TextField = createTextField();
         option3TextField = createTextField();
         option4TextField = createTextField();
+        correctOptionComboBox = createComboBox(new String[]{"1", "2", "3", "4"});
+        levelComboBox = createComboBox(new String[]{"Beginner", "Intermediate", "Advanced"});
 
-        // Combo Boxes
-        correctOptionComboBox = new JComboBox<>(new String[]{"1", "2", "3", "4"});
-        correctOptionComboBox.setFont(inputFont);
-        correctOptionComboBox.setBackground(textFieldBackground);
-        correctOptionComboBox.setForeground(labelColor);
+        String[] labels = {"Question Text:", "Option 1:", "Option 2:", "Option 3:", "Option 4:", "Correct Option:", "Level:"};
+        Component[] fields = {questionTextField, option1TextField, option2TextField, option3TextField, option4TextField, correctOptionComboBox, levelComboBox};
 
-        levelComboBox = new JComboBox<>(new String[]{"Beginner", "Intermediate", "Advanced"});
-        levelComboBox.setFont(inputFont);
-        levelComboBox.setBackground(textFieldBackground);
-        levelComboBox.setForeground(labelColor);
+        for (int i = 0; i < labels.length; i++) {
+            inputPanel.add(createLabel(labels[i]));
+            inputPanel.add(fields[i]);
+        }
 
-        // Add components to inputPanel
-        inputPanel.add(questionTextLabel);
-        inputPanel.add(questionTextField);
-
-        inputPanel.add(option1Label);
-        inputPanel.add(option1TextField);
-
-        inputPanel.add(option2Label);
-        inputPanel.add(option2TextField);
-
-        inputPanel.add(option3Label);
-        inputPanel.add(option3TextField);
-
-        inputPanel.add(option4Label);
-        inputPanel.add(option4TextField);
-
-        inputPanel.add(correctOptionLabel);
-        inputPanel.add(correctOptionComboBox);
-
-        inputPanel.add(levelLabel);
-        inputPanel.add(levelComboBox);
-
-        // Button Panel
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 10));  // Aligned to the right
-        buttonPanel.setBackground(backgroundColor);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
+        buttonPanel.setBackground(BACKGROUND_COLOR);
         contentPane.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Buttons
         JButton saveButton = createButton("Save Question");
-        btnGoToAdminHome = createBackButton("Go to Admin Home");  // "Go to Admin Home" button
-
+        btnGoToAdminHome = createBackButton("Go to Admin Home");
         buttonPanel.add(btnGoToAdminHome);
         buttonPanel.add(saveButton);
 
-
-        // Action Listeners
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addQuestionToDatabase();
-            }
-        });
-
-
-        btnGoToAdminHome.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AdminHomePage().setVisible(true);
-                dispose();
-            }
+        saveButton.addActionListener(e -> addQuestionToDatabase());
+        btnGoToAdminHome.addActionListener(e -> {
+            new AdminHomePage().setVisible(true);
+            dispose();
         });
 
         setVisible(true);
     }
 
-
-    // Helper methods for creating components with consistent styling
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
-        label.setFont(labelFont);
-        label.setForeground(labelColor);
+        label.setFont(LABEL_FONT);
+        label.setForeground(LABEL_COLOR);
         return label;
     }
 
-
     private JTextField createTextField() {
         JTextField textField = new JTextField();
-        textField.setFont(inputFont);
-        textField.setBackground(textFieldBackground);
-        textField.setForeground(labelColor);
-        textField.setCaretColor(primaryColor);
+        textField.setFont(INPUT_FONT);
+        textField.setBackground(TEXTFIELD_BG);
+        textField.setForeground(LABEL_COLOR);
+        textField.setCaretColor(PRIMARY_COLOR);
         textField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         return textField;
     }
 
+    private JComboBox<String> createComboBox(String[] items) {
+        JComboBox<String> comboBox = new JComboBox<>(items);
+        comboBox.setFont(INPUT_FONT);
+        comboBox.setBackground(TEXTFIELD_BG);
+        comboBox.setForeground(LABEL_COLOR);
+        return comboBox;
+    }
+
     private JButton createButton(String text) {
         JButton button = new JButton(text);
-        button.setBackground(primaryColor);
+        button.setBackground(PRIMARY_COLOR);
         button.setForeground(Color.WHITE);
-        button.setFont(buttonFont);
+        button.setFont(BUTTON_FONT);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -173,30 +121,27 @@ public class AddQuestionPage extends JFrame {
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(primaryColor);
+                button.setBackground(PRIMARY_COLOR);
             }
         });
         return button;
     }
 
-
     private JButton createBackButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(smallButtonFont);            // Smaller font
-        button.setBackground(backgroundColor);      // Transparent background
-        button.setForeground(primaryColor);        // Use primary color for text
+        button.setFont(SMALL_BUTTON_FONT);
+        button.setBackground(BACKGROUND_COLOR);
+        button.setForeground(PRIMARY_COLOR);
         button.setFocusPainted(false);
-        button.setBorderPainted(false);              // Remove border
+        button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Add hover effect (optional)
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setForeground(primaryColor.brighter());
+                button.setForeground(PRIMARY_COLOR.brighter());
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setForeground(primaryColor);
+                button.setForeground(PRIMARY_COLOR);
             }
         });
         return button;
@@ -222,12 +167,6 @@ public class AddQuestionPage extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                AddQuestionPage frame = new AddQuestionPage();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        SwingUtilities.invokeLater(AddQuestionPage::new);
     }
 }

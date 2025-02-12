@@ -35,7 +35,7 @@ public class AllPlayers extends JFrame {
     // Setup JFrame details
     private void setupFrame() {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 600, 400);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         JPanel contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         setContentPane(contentPane);

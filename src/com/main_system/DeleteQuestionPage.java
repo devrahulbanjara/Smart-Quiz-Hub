@@ -27,7 +27,7 @@ public class DeleteQuestionPage extends JFrame {
     public DeleteQuestionPage() {
         setTitle("Delete Question");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 600, 400);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         contentPane = new JPanel();
         contentPane.setBackground(backgroundColor);
         contentPane.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -92,9 +92,23 @@ public class DeleteQuestionPage extends JFrame {
                     return;
                 }
 
-                deleteQuestion(questionId);
+                // Check if the question ID is a valid positive integer
+                try {
+                    int id = Integer.parseInt(questionId);
+                    if (id <= 0) {
+                        JOptionPane.showMessageDialog(contentPane, "Please enter a positive Question ID.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Proceed to delete the question
+                    deleteQuestion(String.valueOf(id));
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(contentPane, "Invalid Question ID format. Please enter a valid number.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
+
 
         btnGoToAdminHome.addActionListener(new ActionListener() {
             @Override

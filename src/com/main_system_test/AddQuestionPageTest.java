@@ -60,13 +60,14 @@ class AddQuestionPageTest {
         }
     }
 
+    // i made this throw error, DB name nai wrong xa
     @Test
     void testAddQuestionToDatabaseWithSQLException() {
-        addQuestionPage.questionTextField.setText("What is the capital of France?");
-        addQuestionPage.option1TextField.setText("Berlin");
-        addQuestionPage.option2TextField.setText("Madrid");
-        addQuestionPage.option3TextField.setText("Paris");
-        addQuestionPage.option4TextField.setText("Rome");
+        addQuestionPage.questionTextField.setText("Who took my viva? ");
+        addQuestionPage.option1TextField.setText("Anil Sir");
+        addQuestionPage.option2TextField.setText("Subash Sir");
+        addQuestionPage.option3TextField.setText("Lochan Sir");
+        addQuestionPage.option4TextField.setText("Prakash Sir");
         addQuestionPage.correctOptionComboBox.setSelectedItem("3");
         addQuestionPage.levelComboBox.setSelectedItem("Intermediate");
 
